@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LogForge — Dev-Focused Service Monitoring</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        body.fade-in {
+            opacity: 1;
+        }
+
+        .hero {
+            padding: 4rem 1rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            font-weight: 500;
+            min-height: 2em;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .features div {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            color: #888;
+        }
+
+        .btns {
+            margin-top: 2rem;
+        }
+
+        .btns a {
+            margin-right: 1rem;
+        }
+
+        .form-wrapper {
+            max-width: 640px;
+            margin: 3rem auto;
+            background: #f9fafb;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .form-wrapper h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-wrapper p {
+            text-align: center;
+            width: 100%;
+            color: #444;
+            margin-bottom: 1.5rem;
+            max-width: 500px;
+        }
+
+        .form-wrapper iframe {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <section class="hero">
+            <h1>LogForge</h1>
+            <p id="animated-tagline"></p>
+            <p style="font-size: 1.1rem; color: #555;">Monitoring made for teams that ship fast — not just for ops.</p>
+
+
+            <script>
+                const phrases = [{
+                        text: "Not logs",
+                        delay: 1500
+                    },
+                    {
+                        text: "Not analysis",
+                        delay: 1500
+                    },
+                    {
+                        text: "Just solutions.",
+                        delay: 2000
+                    }
+                ];
+
+                const el = document.getElementById("animated-tagline");
+                let index = 0;
+
+                function typePhrase() {
+                    const {
+                        text,
+                        delay
+                    } = phrases[index];
+                    el.textContent = "";
+                    let i = 0;
+                    const interval = setInterval(() => {
+                        el.textContent += text[i];
+                        i++;
+                        if (i === text.length) {
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                index++;
+                                if (index < phrases.length) typePhrase();
+                            }, delay);
+                        }
+                    }, 60);
+                }
+
+                typePhrase();
+            </script>
+
+            <div class="btns">
+                <a href="https://github.com/log-forge/logforge" class="contrast" role="button" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </section>
+        <section style="text-align: center; margin-top: 4rem;">
+            <h2>Built for Fast-Moving Teams Using Docker</h2>
+            <p style="max-width: 700px; margin: auto; font-size: 1.1rem; color: #444; margin-top: 1rem;">
+                LogForge is the developer-first monitoring tool made for Dockerized workflows. It helps fast-moving teams and startups stay confident in production-like dev environments, and iterate quickly.
+            </p>
+            <p style="max-width: 700px; margin: auto; font-size: 1.1rem; color: #444; margin-top: 1rem;">
+                Speed up dev cycles, fix faster. Ship faster.
+            </p>
+
+            <section style="margin-top: 2rem; text-align: center;">
+                <h2>Install LogForge Now</h2>
+                <p style="color: #555; margin-bottom: 1rem;">
+                    Self-host in seconds with Docker. One command to get started:
+                </p>
+
+                <div onclick="copyInstallToClipboard()" id="copyBox" style="
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    max-width: 720px;
+    margin: auto;
+    padding: 1rem;
+    font-family: SFMono-Regular, Consolas, monospace;
+    font-size: 0.9rem;
+    position: relative;
+    cursor: pointer;
+    text-align: left;
+  " title="Click to copy">
+                    <pre id="installSnippet" style="
+      background: #f3f4f6;
+      padding: 0.75rem 1rem;
+      margin: 0;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    ">git clone https://github.com/log-forge/logforge.git
+cd logforge
+docker compose up -d --build</pre>
+
+                    <div id="copyIcon" style="
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      color: #6b7280;
+      transition: opacity 0.2s ease;
+    ">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3a1 1 0 011-1h9a1 1 0 011 1v14a1 1 0 01-1 1h-5m-4 0H5a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 011 1z" />
+                        </svg>
+                    </div>
+
+                    <div id="copiedText" style="
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      color: #10b981;
+      font-weight: bold;
+      display: none;
+    ">Copied!</div>
+                </div>
+            </section>
+
+            <script>
+                function copyInstallToClipboard() {
+                    const text = document.getElementById("installSnippet").innerText.trim();
+                    navigator.clipboard.writeText(text).then(() => {
+                        const icon = document.getElementById("copyIcon");
+                        const copied = document.getElementById("copiedText");
+
+                        icon.style.display = "none";
+                        copied.style.display = "block";
+
+                        setTimeout(() => {
+                            copied.style.display = "none";
+                            icon.style.display = "block";
+                        }, 2000);
+                    });
+                }
+            </script>
+
+
+            <p style="max-width: 700px; margin: auto; font-size: 1.1rem; color: #444; margin-top: 1.5rem;">
+                Monitor your containers. Tail logs. Get alerts. All in one lightweight dashboard built for devs.
+            </p>
+        </section>
+
+
+
+        <section class="features">
+            <div>
+                <h3>🛠 Service Overview</h3>
+                <p>Autodetect and list services from Docker. See real-time status and control your services from the UI.</p>
+            </div>
+            <div>
+                <h3>📜 Live Log Viewer</h3>
+                <p>Tail logs from containers with a clean UI. Filter for errors, warnings, or custom keywords.</p>
+            </div>
+            <div>
+                <h3>🚨 Smart Alerts</h3>
+                <p>
+                    Subscribe to containers. Get instant email alerts for errors that matter — per-container, per-keyword.
+                </p>
+            </div>
+            <div>
+                <h3>⚡ One Command Setup</h3>
+                <p>No agents, no config hell. Just run <code>docker compose up -d --build</code> and go.</p>
+            </div>
+            <div>
+                <h3>📈 Built for Speed</h3>
+                <p>Minimal overhead. Zero config. Get started in seconds, scale as needed — no learning curve.</p>
+            </div>
+            <div>
+                <h3>📊 Not Just Another Log Viewer</h3>
+                <p>Always-on, local, and alert-driven — built to speed up dev cycles and help developers focus on what actually matters.</p>
+            </div>
+
+        </section>
+
+        <section style="margin-top: 5rem;">
+            <h2 style="text-align: center;">LogForge for Developers, LogForge for Teams</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 2.5rem;">
+                Start free. Upgrade when you're ready to scale with your team.
+            </p>
+
+            <div style="max-width: 720px; margin: auto;">
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; border-bottom: 1px solid #ccc; font-weight: bold; padding: 1rem 0;">
+                    <div>Feature</div>
+                    <div style="text-align: center;">Free</div>
+                    <div style="text-align: center;">Premium</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Real-time logs & alerts</div>
+                    <div style="text-align: center;">✔</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Self-hosted dashboard</div>
+                    <div style="text-align: center;">✔</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Log retention (7+ days)</div>
+                    <div style="text-align: center;">—</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Cloud sync & multi-device</div>
+                    <div style="text-align: center;">—</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>AI-assisted debugging</div>
+                    <div style="text-align: center;">—</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>RBAC (Role-based access)</div>
+                    <div style="text-align: center;">—</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
+            </div>
+        </section>
+
+        <section style="text-align: center; margin-top: 4rem;">
+            <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">
+                LogForge is open source and built for devs who move fast.
+            </p>
+            <p style="margin-bottom: 0.5rem;">
+                ✨ Star us on Github to show support!
+            </p>
+
+            <div style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.25rem;">⭐</span>
+                <iframe src="https://ghbtns.com/github-btn.html?user=log-forge&repo=logforge&type=star&count=true" frameborder="0" scrolling="0" width="100" height="20" title="GitHub Star Button" style="vertical-align: middle;"></iframe>
+            </div>
+        </section>
+
+
+        <section style="margin-top: 4rem; padding: 2rem 1rem; background-color: #f5f5f5; border-radius: 8px;">
+            <h2 style="text-align: center; font-size: 2rem; margin-bottom: 2rem;">🆚 How We Compare</h2>
+            <div style="max-width: 700px; margin: 0 auto; font-size: 1.1rem; line-height: 1.8; color: #444;">
+                <p><strong>Dozzle</strong> only works while you're watching.</p>
+                <p><strong>Papertrail</strong> charges for search and lacks real-time alerts.</p>
+                <p><strong>Portainer</strong> is for ops, not devs.</p>
+                <p><strong>Datadog</strong> is heavy, expensive, and cloud-locked.</p>
+                <p><strong>Grafana + Loki</strong> requires complex setup and tuning.</p>
+                <p><strong>ELK Stack</strong> needs multiple services and constant babysitting.</p>
+                <p><strong>Logtail</strong> is hosted-only with limited flexibility.</p>
+                <p><strong>LogForge</strong> is always-on, self-hosted, alert-driven, and built for devs who want fast, clear feedback — no cloud, no config, no noise.</p>
+            </div>
+        </section>
+
+
+        <p style="font-size: 0.95rem; color: #777; text-align: center; margin-top: 2rem;">
+            Built by devs for devs — already used by fast-moving teams.
+        </p>
+        <section class="form-wrapper">
+            <h2>Interested in Premium?</h2>
+            <p>Get early access to premium features — <strong>spots are limited</strong>, so don't miss out.</p>
+            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe7D8ET0jccLyB7ufdlz3Lj9IEhLvrrvncpP8xzFvLgqYZGEQ/viewform?embedded=true" height="620">
+                Loading…
+            </iframe>
+        </section>
+
+        <footer>
+            © 2025 LogForge — Made for dev environments 🐳
+        </footer>
+    </main>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('fade-in');
+        });
+    </script>
+</body>
+
+</html>
