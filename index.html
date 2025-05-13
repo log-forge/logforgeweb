@@ -64,15 +64,13 @@
         }
 
         .form-wrapper {
-            max-width: 640px;
+            max-width: 700px;
             margin: 3rem auto;
             background: #f9fafb;
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
         }
 
         .form-wrapper h2 {
@@ -81,11 +79,9 @@
         }
 
         .form-wrapper p {
-            text-align: center;
-            width: 100%;
             color: #444;
             margin-bottom: 1.5rem;
-            max-width: 500px;
+            font-size: 1.1rem;
         }
 
         .form-wrapper iframe {
@@ -93,6 +89,21 @@
             width: 100%;
             max-width: 100%;
             border: none;
+        }
+
+
+        .dashboard-screenshot {
+            width: 100%;
+            max-width: 960px;
+            border-radius: 10px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+            margin-top: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-screenshot:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
         }
     </style>
 </head>
@@ -103,55 +114,60 @@
             <h1>LogForge</h1>
             <p id="animated-tagline"></p>
             <p style="font-size: 1.1rem; color: #555;">Monitoring made for teams that ship fast — not just for ops.</p>
+            <section style="text-align: center; margin-top: 4rem;">
 
-
-            <script>
-                const phrases = [{
-                        text: "Not logs",
-                        delay: 1500
-                    },
-                    {
-                        text: "Not analysis",
-                        delay: 1500
-                    },
-                    {
-                        text: "Just solutions.",
-                        delay: 2000
-                    }
-                ];
-
-                const el = document.getElementById("animated-tagline");
-                let index = 0;
-
-                function typePhrase() {
-                    const {
-                        text,
-                        delay
-                    } = phrases[index];
-                    el.textContent = "";
-                    let i = 0;
-                    const interval = setInterval(() => {
-                        el.textContent += text[i];
-                        i++;
-                        if (i === text.length) {
-                            clearInterval(interval);
-                            setTimeout(() => {
-                                index++;
-                                if (index < phrases.length) typePhrase();
-                            }, delay);
+                <script>
+                    const phrases = [{
+                            text: "Not logs",
+                            delay: 1500
+                        },
+                        {
+                            text: "Not analysis",
+                            delay: 1500
+                        },
+                        {
+                            text: "Just solutions.",
+                            delay: 2000
                         }
-                    }, 60);
-                }
+                    ];
 
-                typePhrase();
-            </script>
+                    const el = document.getElementById("animated-tagline");
+                    let index = 0;
 
-            <div class="btns">
-                <a href="https://github.com/log-forge/logforge" class="contrast" role="button" target="_blank" rel="noopener noreferrer">GitHub</a>
-            </div>
-        </section>
-        <section style="text-align: center; margin-top: 4rem;">
-            <h2>Built for Fast-Moving Teams Using Docker</h2>
+                    function typePhrase() {
+                        const {
+                            text,
+                            delay
+                        } = phrases[index];
+                        el.textContent = "";
+                        let i = 0;
+                        const interval = setInterval(() => {
+                            el.textContent += text[i];
+                            i++;
+                            if (i === text.length) {
+                                clearInterval(interval);
+                                setTimeout(() => {
+                                    index++;
+                                    if (index < phrases.length) typePhrase();
+                                }, delay);
+                            }
+                        }, 60);
+                    }
+
+                    typePhrase();
+                </script>
+
+                <div class="btns">
+                    <a href="https://github.com/log-forge/logforge" class="contrast" role="button" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </div>
+
+            </section>
+            <section style="text-align: center; margin-top: 1rem;">
+                <h2>Built for Fast-Moving Teams Using Docker</h2>
+                <section style="text-align: center; margin-top: 1rem;">
+                    <img src="https://raw.githubusercontent.com/log-forge/logforgeweb/main/assets/logforge-overview.gif"" alt=" LogForge container dashboard" class="dashboard-screenshot" />
+                </section>
+            </section>
             <p style="max-width: 700px; margin: auto; font-size: 1.1rem; color: #444; margin-top: 1rem;">
                 LogForge is the developer-first monitoring tool made for Dockerized workflows. It helps fast-moving teams and startups stay confident in production-like dev environments, and iterate quickly.
             </p>
