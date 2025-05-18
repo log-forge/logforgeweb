@@ -387,22 +387,25 @@ docker compose up -d --build</pre>
         document.body.classList.add('fade-in');
 
         const hash = window.location.hash;
-        if (hash) {
-            const el = document.querySelector(hash);
-            if (el) {
+        if (hash === "#premium") {
+            const targetWrapper = document.querySelector(".form-wrapper");
+            if (targetWrapper) {
                 setTimeout(() => {
-                    el.scrollIntoView({ behavior: 'smooth' });
-                    // Add a temporary highlight
-                    el.style.transition = 'box-shadow 0.5s ease';
-                    el.style.boxShadow = '0 0 0 6px rgba(0, 200, 255, 0.5)';
+                    targetWrapper.scrollIntoView({ behavior: 'smooth' });
+
+                    // Add a glowing highlight
+                    targetWrapper.style.transition = 'box-shadow 0.5s ease';
+                    targetWrapper.style.boxShadow = '0 0 0 6px rgba(0, 200, 255, 0.5)';
+
                     setTimeout(() => {
-                        el.style.boxShadow = 'none';
+                        targetWrapper.style.boxShadow = 'none';
                     }, 2000);
                 }, 300);
             }
         }
     });
 </script>
+
 
 
 </body>
