@@ -368,8 +368,8 @@ docker compose up -d --build</pre>
         <p style="font-size: 0.95rem; color: #777; text-align: center; margin-top: 2rem;">
             Built by devs for devs — already used by fast-moving teams.
         </p>
+        <a id="premium"></a>
         <section class="form-wrapper">
-            <a id="premium"></a>
             <h2>Interested in Premium?</h2>
             <p>Get early access to premium features — <strong>spots are limited</strong>, so don't miss out.</p>
             <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe7D8ET0jccLyB7ufdlz3Lj9IEhLvrrvncpP8xzFvLgqYZGEQ/viewform?embedded=true" height="620">
@@ -392,11 +392,18 @@ docker compose up -d --build</pre>
             if (el) {
                 setTimeout(() => {
                     el.scrollIntoView({ behavior: 'smooth' });
+                    // Add a temporary highlight
+                    el.style.transition = 'box-shadow 0.5s ease';
+                    el.style.boxShadow = '0 0 0 6px rgba(0, 200, 255, 0.5)';
+                    setTimeout(() => {
+                        el.style.boxShadow = 'none';
+                    }, 2000);
                 }, 300);
             }
         }
     });
 </script>
+
 
 </body>
 
