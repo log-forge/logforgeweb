@@ -105,6 +105,12 @@
             transform: translateY(-10px) scale(1.25);
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
         }
+
+        .feature-box {
+            grid-column: 1 / -1;
+            /* Span both columns */
+            justify-self: center;
+        }
     </style>
 </head>
 
@@ -282,89 +288,93 @@ docker compose up -d --build
                 <h3>📊 Not Just Another Log Viewer</h3>
                 <p>Always-on, local, and alert-driven — built to speed up dev cycles and help developers focus on what actually matters.</p>
             </div>
+            <div class="feature-box centered">
+                <h3 style="text-align: center;">🤖Cursor for Your Docker Container</h3>
+                <p style="text-align: center;">AI agents that live inside each container — reading logs, explaining crashes, and helping you fix or improve your code with context-aware suggestions.</p>
+            </div>
 
         </section>
 
-<section style="margin-top: 5rem;">
-  <h2 style="text-align: center;">LogForge for Developers, LogForge for Teams</h2>
-  <p style="text-align: center; color: #666; margin-bottom: 2.5rem;">
-    Start free. Upgrade when you're ready to scale with your team.
-  </p>
+        <section style="margin-top: 5rem;">
+            <h2 style="text-align: center;">LogForge for Developers, LogForge for Teams</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 2.5rem;">
+                Start free. Upgrade when you're ready to scale with your team.
+            </p>
 
-  <div style="max-width: 720px; margin: auto;">
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; border-bottom: 1px solid #ccc; font-weight: bold; padding: 1rem 0;">
-      <div>Feature</div>
-      <div style="text-align: center;">Free</div>
-      <div style="text-align: center;">Premium</div>
-    </div>
+            <div style="max-width: 720px; margin: auto;">
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; border-bottom: 1px solid #ccc; font-weight: bold; padding: 1rem 0;">
+                    <div>Feature</div>
+                    <div style="text-align: center;">Free</div>
+                    <div style="text-align: center;">Premium</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div>Real-time logs & alerts</div>
-      <div style="text-align: center;">✔</div>
-      <div style="text-align: center;">✔</div>
-    </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Real-time logs & alerts</div>
+                    <div style="text-align: center;">✔</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div>Self-hosted dashboard</div>
-      <div style="text-align: center;">✔</div>
-      <div style="text-align: center;">✔</div>
-    </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Self-hosted dashboard</div>
+                    <div style="text-align: center;">✔</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div> Notification Channels: Discord, Slack, Telegram, Gotify and Email</div>
-      <div style="text-align: center;">✔</div>
-      <div style="text-align: center;">✔</div>
-    </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div> Notification Channels: Discord, Slack, Telegram, Gotify and Email</div>
+                    <div style="text-align: center;">✔</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div>AI-assisted alert summaries (optional)</div>
-      <div style="text-align: center;">✔</div>
-      <div style="text-align: center;">✔</div>
-    </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>AI-assisted alert summaries (optional)</div>
+                    <div style="text-align: center;">✔</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div>Global alert keywords</div>
-      <div style="text-align: center;">✔</div>
-      <div style="text-align: center;">✔</div>
-    </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Global alert keywords</div>
+                    <div style="text-align: center;">✔</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div>Log retention (7+ days)</div>
-      <div style="text-align: center;">—</div>
-      <div style="text-align: center;">✔</div>
-    </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Log retention (7+ days)</div>
+                    <div style="text-align: center;">—</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div>Cloud sync & multi-device</div>
-      <div style="text-align: center;">—</div>
-      <div style="text-align: center;">✔</div>
-    </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Cloud sync & multi-device</div>
+                    <div style="text-align: center;">—</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div>RBAC (Role-based access)</div>
-      <div style="text-align: center;">—</div>
-      <div style="text-align: center;">✔</div>
-    </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>RBAC (Role-based access)</div>
+                    <div style="text-align: center;">—</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div>Per-container alert keywords</div>
-      <div style="text-align: center;">—</div>
-      <div style="text-align: center;">✔</div>
-    </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Per-container alert keywords</div>
+                    <div style="text-align: center;">—</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div>Custom notification channels</div>
-      <div style="text-align: center;">—</div>
-      <div style="text-align: center;">✔</div>
-    </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Custom notification channels</div>
+                    <div style="text-align: center;">—</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-      <div>Scoped AI agents per container: AI Contextual summaries & fix suggestions (private/local)</div>
-      <div style="text-align: center;">—</div>
-      <div style="text-align: center;">✔</div>
-    </div>
-  </div>
-</section>
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                    <div>Scoped AI agents per container: AI Contextual summaries & fix suggestions (private/local)</div>
+                    <div style="text-align: center;">—</div>
+                    <div style="text-align: center;">✔</div>
+                </div>
+            </div>
+        </section>
 
 
         <section style="text-align: center; margin-top: 4rem;">
@@ -414,29 +424,31 @@ docker compose up -d --build
         </footer>
     </main>
 
-<script>
-    window.addEventListener('DOMContentLoaded', () => {
-        document.body.classList.add('fade-in');
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('fade-in');
 
-        const hash = window.location.hash;
-        if (hash === "#premium") {
-            const targetWrapper = document.querySelector(".form-wrapper");
-            if (targetWrapper) {
-                setTimeout(() => {
-                    targetWrapper.scrollIntoView({ behavior: 'smooth' });
-
-                    // Add a glowing highlight
-                    targetWrapper.style.transition = 'box-shadow 0.5s ease';
-                    targetWrapper.style.boxShadow = '0 0 0 6px rgba(0, 200, 255, 0.5)';
-
+            const hash = window.location.hash;
+            if (hash === "#premium") {
+                const targetWrapper = document.querySelector(".form-wrapper");
+                if (targetWrapper) {
                     setTimeout(() => {
-                        targetWrapper.style.boxShadow = 'none';
-                    }, 2000);
-                }, 300);
+                        targetWrapper.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+
+                        // Add a glowing highlight
+                        targetWrapper.style.transition = 'box-shadow 0.5s ease';
+                        targetWrapper.style.boxShadow = '0 0 0 6px rgba(0, 200, 255, 0.5)';
+
+                        setTimeout(() => {
+                            targetWrapper.style.boxShadow = 'none';
+                        }, 2000);
+                    }, 300);
+                }
             }
-        }
-    });
-</script>
+        });
+    </script>
 
 
 
