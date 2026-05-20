@@ -1,460 +1,327 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="google-site-verification" content="5gdbox0Q_wbktke-19hYoCBIcnkvSwL-Vssron53sCU" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LogForge — Dev-Focused Service Monitoring</title>
-    <link rel="icon" href="https://raw.githubusercontent.com/log-forge/logforgeweb/refs/heads/main/assets/logo-32x32.ico" type="image/x-icon" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
-    <style>
-        body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            opacity: 0;
-            transition: opacity 1s ease-in;
-        }
-
-        body.fade-in {
-            opacity: 1;
-        }
-
-        .hero {
-            padding: 1rem 1rem;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .hero p {
-            font-size: 1.5rem;
-            font-weight: 500;
-            min-height: 2em;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .features div {
-            background: #f9f9f9;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 1rem;
-            padding: 2rem 0;
-            color: #888;
-        }
-
-        .btns {
-            margin-top: 2rem;
-        }
-
-        .btns a {
-            margin-right: 1rem;
-        }
-
-        .form-wrapper {
-            max-width: 700px;
-            margin: 3rem auto;
-            background: #f9fafb;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-            text-align: center;
-        }
-
-        .form-wrapper h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .form-wrapper p {
-            color: #444;
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-        }
-
-        .form-wrapper iframe {
-            display: block;
-            width: 100%;
-            max-width: 100%;
-            border: none;
-        }
-
-
-        .dashboard-screenshot {
-            width: 100%;
-            max-width: 960px;
-            border-radius: 10px;
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-            margin-top: 1.5rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .dashboard-screenshot:hover {
-            transform: translateY(-10px) scale(1.25);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
-        }
-
-        .feature-box {
-            grid-column: 1 / -1;
-            /* Span both columns */
-            justify-self: center;
-        }
-    </style>
+    <meta name="description" content="LogForge watches Docker logs for keyword alerts, routes signals, and triggers fix automations from a local Docker Compose deployment." />
+    <title>LogForge - Docker Keyword Alerts And Fix Automations</title>
+    <link rel="icon" href="assets/logo-32x32.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-    <main class="container">
-        <section class="hero">
-            <h1>LogForge</h1>
-            <p id="animated-tagline"></p>
-            <p style="font-size: 1.1rem; color: #555;">Monitoring made for teams that ship fast — not just for ops.</p>
-            <section style="text-align: center; margin-top: 4rem;">
+    <header class="site-header">
+        <a class="brand" href="#top" aria-label="LogForge home">
+            <img src="assets/logforge-Icon-transparent-512x512.png" alt="" />
+            <span>LogForge</span>
+        </a>
 
-                <script>
-                    const phrases = [{
-                            text: "Not logs",
-                            delay: 750
-                        },
-                        {
-                            text: "Not analysis",
-                            delay: 750
-                        },
-                        {
-                            text: "Just solutions.",
-                            delay: 1000
-                        }
-                    ];
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="#install">Install</a>
+            <a href="#features">Features</a>
+            <a href="#enterprise">Enterprise</a>
+            <a href="#compare">Compare</a>
+            <a href="#premium">Premium</a>
+        </nav>
 
-                    const el = document.getElementById("animated-tagline");
-                    let index = 0;
+        <a class="header-cta" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </header>
 
-                    function typePhrase() {
-                        const {
-                            text,
-                            delay
-                        } = phrases[index];
-                        el.textContent = "";
-                        let i = 0;
-                        const interval = setInterval(() => {
-                            el.textContent += text[i];
-                            i++;
-                            if (i === text.length) {
-                                clearInterval(interval);
-                                setTimeout(() => {
-                                    index++;
-                                    if (index < phrases.length) typePhrase();
-                                }, delay);
-                            }
-                        }, 60);
-                    }
+    <main id="top">
+        <section class="hero" aria-labelledby="hero-title">
+            <figure class="hero-backdrop" aria-hidden="true">
+                <img src="assets/logforge-home.png" alt="" />
+            </figure>
 
-                    typePhrase();
-                </script>
-
-                <div class="btns">
-                    <a href="https://github.com/log-forge/logforge" class="contrast" role="button" target="_blank" rel="noopener noreferrer">GitHub</a>
-                </div>
-
-            </section>
-            <section style="text-align: center; margin-top: 1rem;">
-                <h2>Built for Fast-Moving Teams Using Docker</h2>
-                <section style="text-align: center; margin-top: 1rem;">
-                    <img src="https://raw.githubusercontent.com/log-forge/logforgeweb/main/assets/logforge-overview.gif" alt=" LogForge container dashboard" class="dashboard-screenshot" />
-                </section>
-            </section>
-            <p style="max-width: 700px; margin: auto; font-size: 1.1rem; color: #444; margin-top: 1rem;">
-                LogForge is the developer-first monitoring tool made for Dockerized workflows. It helps fast-moving teams and startups stay confident in production-like dev environments, and iterate quickly.
-            </p>
-            <p style="max-width: 700px; margin: auto; font-size: 1.1rem; color: #444; margin-top: 1rem;">
-                Speed up dev cycles, fix faster. Ship faster.
-            </p>
-
-            <section style="margin-top: 2rem; text-align: center;">
-                <h2>Install LogForge Now</h2>
-                <p style="color: #555; margin-bottom: 1rem;">
-                    Self-host in seconds with Docker. One command to get started:
-                </p>
-
-                <div onclick="copyInstallToClipboard()" id="copyBox" style="
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    max-width: 720px;
-    margin: auto;
-    padding: 1rem;
-    font-family: SFMono-Regular, Consolas, monospace;
-    font-size: 0.9rem;
-    position: relative;
-    cursor: pointer;
-    text-align: left;
-  " title="Click to copy">
-                    <pre id="installSnippet" style="
-      background: #f3f4f6;
-      padding: 0.75rem 1rem;
-      margin: 0;
-      border-radius: 6px;
-      white-space: pre-wrap;
-      overflow-x: auto;
-    ">git clone https://github.com/log-forge/logforge.git
-cd logforge
-docker compose up -d --build
-</pre>
-
-                    <div id="copyIcon" style="
-      position: absolute;
-      top: 0.85rem;
-      right: 0.85rem;
-      color: #6b7280;
-      transition: opacity 0.2s ease;
-    ">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3a1 1 0 011-1h9a1 1 0 011 1v14a1 1 0 01-1 1h-5m-4 0H5a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 011 1z" />
-                        </svg>
+            <div class="hero-layout">
+                <div class="hero-content">
+                    <p class="eyebrow">Docker alerts that act</p>
+                    <h1 id="hero-title">Catch alerts. Trigger fixes.</h1>
+                    <p id="animated-tagline" class="animated-tagline" aria-live="polite"></p>
+                    <p class="hero-copy">
+                        LogForge watches Docker logs for the keywords you care about, routes the alert, and kicks off the automation that fixes it. Run it locally with Docker Compose and keep operational data close to your hosts.
+                    </p>
+                    <div class="action-row" aria-label="Primary actions">
+                        <a class="button primary" href="#install">Install LogForge</a>
+                        <a class="button secondary" href="https://logforgedeposit.dev/#deposit" target="_blank" rel="noopener noreferrer">Reserve Your Spot</a>
                     </div>
-
-                    <div id="copiedText" style="
-      position: absolute;
-      top: 0.85rem;
-      right: 0.85rem;
-      color: #10b981;
-      font-weight: bold;
-      display: none;
-    ">Copied!</div>
                 </div>
-            </section>
 
-            <script>
-                function copyInstallToClipboard() {
-                    const text = document.getElementById("installSnippet").innerText.trim();
-                    navigator.clipboard.writeText(text).then(() => {
-                        const icon = document.getElementById("copyIcon");
-                        const copied = document.getElementById("copiedText");
-
-                        icon.style.display = "none";
-                        copied.style.display = "block";
-
-                        setTimeout(() => {
-                            copied.style.display = "none";
-                            icon.style.display = "block";
-                        }, 2000);
-                    });
-                }
-            </script>
-
-
-            <p style="max-width: 700px; margin: auto; font-size: 1.1rem; color: #444; margin-top: 1.5rem;">
-                Monitor your containers. Tail logs. Get alerts. All in one lightweight dashboard built for devs.
-            </p>
+                <aside class="hero-panel" aria-label="LogForge capabilities">
+                    <div>
+                        <span>Keyword alerts</span>
+                        <strong>Match the log patterns that actually matter.</strong>
+                    </div>
+                    <div>
+                        <span>Fix automations</span>
+                        <strong>Trigger remediation when an alert fires.</strong>
+                    </div>
+                    <div>
+                        <span>Local control</span>
+                        <strong>Run the alerting and automation loop on your own Docker hosts.</strong>
+                    </div>
+                </aside>
+            </div>
         </section>
 
+        <section id="install" class="section install-section" aria-labelledby="install-title">
+            <div class="install-command-center">
+                <div class="install-copy">
+                    <p class="eyebrow">Install</p>
+                    <h2 id="install-title">Install the alerting and automation loop locally.</h2>
+                    <p>Clone the repository, start the services, and open LogForge on your machine to watch logs, match keywords, route alerts, and trigger fixes close to your hosts.</p>
 
-
-        <section class="features">
-            <div>
-                <h3>🛠 Service Overview</h3>
-                <p>Autodetect and list services from Docker. See real-time status and control your services from the UI.</p>
-            </div>
-            <div>
-                <h3>📜 Logs, Terminals & Files</h3>
-                <p>Filter for errors, warnings, or custom keywords. Access an interactive terminal and browse container files directly from your browser.</p>
-            </div>
-            <div>
-                <h3>🚨 Smart Alerts</h3>
-                <p>
-                    Subscribe to containers. Get instant email alerts for errors that matter — per-container, per-keyword.
-                </p>
-            </div>
-            <div>
-                <h3>⚡ One Command Setup</h3>
-                <p>No agents, no config hell. Just run <code>docker compose up -d --build</code> and go.</p>
-            </div>
-            <div>
-                <h3>📈 Built for Speed</h3>
-                <p>Minimal overhead. Zero config. Get started in seconds, scale as needed — no learning curve.</p>
-            </div>
-            <div>
-                <h3>📊 Not Just Another Log Viewer</h3>
-                <p>Always-on, local, and alert-driven — built to speed up dev cycles and help developers focus on what actually matters.</p>
-            </div>
-            <div class="feature-box centered">
-                <h3 style="text-align: center;">🤖Cursor for Your Docker Container</h3>
-                <p style="text-align: center;">AI agents that live inside each container — reading logs, explaining crashes, and helping you fix or improve your code with context-aware suggestions.</p>
-            </div>
-
-        </section>
-
-        <section style="margin-top: 5rem;">
-            <h2 style="text-align: center;">LogForge for Developers, LogForge for Teams</h2>
-            <p style="text-align: center; color: #666; margin-bottom: 2.5rem;">
-                Start free. Upgrade when you're ready to scale with your team.
-            </p>
-
-            <div style="max-width: 720px; margin: auto;">
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; border-bottom: 1px solid #ccc; font-weight: bold; padding: 1rem 0;">
-                    <div>Feature</div>
-                    <div style="text-align: center;">Free</div>
-                    <div style="text-align: center;">Premium</div>
+                    <div class="install-status-grid" aria-label="Install readiness">
+                        <article>
+                            <span>Runtime</span>
+                            <strong>Docker Compose</strong>
+                        </article>
+                        <article>
+                            <span>Endpoint</span>
+                            <strong>localhost:8444</strong>
+                        </article>
+                        <article>
+                            <span>Scope</span>
+                            <strong>Local alerts</strong>
+                        </article>
+                    </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div>Real-time logs & alerts</div>
-                    <div style="text-align: center;">✔</div>
-                    <div style="text-align: center;">✔</div>
-                </div>
+                <div class="install-card">
+                    <div class="code-header">
+                        <span>Docker Compose quick start</span>
+                        <button id="copy-install" class="copy-button" type="button" data-copy-target="install-snippet">
+                            <span class="copy-default">Copy</span>
+                            <span class="copy-success">Copied</span>
+                        </button>
+                    </div>
+                    <pre><code id="install-snippet">git clone https://github.com/log-forge/logforge.git
+cd logforge
+docker compose pull
+docker compose up -d
+docker compose ps
 
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div>Self-hosted dashboard</div>
-                    <div style="text-align: center;">✔</div>
-                    <div style="text-align: center;">✔</div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div> Notification Channels: Discord, Slack, Telegram, Gotify and Email</div>
-                    <div style="text-align: center;">✔</div>
-                    <div style="text-align: center;">✔</div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div>AI-assisted alert summaries (optional)</div>
-                    <div style="text-align: center;">✔</div>
-                    <div style="text-align: center;">✔</div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div>Global alert keywords</div>
-                    <div style="text-align: center;">✔</div>
-                    <div style="text-align: center;">✔</div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div>Log retention (7+ days)</div>
-                    <div style="text-align: center;">—</div>
-                    <div style="text-align: center;">✔</div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div>Cloud sync & multi-device</div>
-                    <div style="text-align: center;">—</div>
-                    <div style="text-align: center;">✔</div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div>RBAC (Role-based access)</div>
-                    <div style="text-align: center;">—</div>
-                    <div style="text-align: center;">✔</div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div>Per-container alert keywords</div>
-                    <div style="text-align: center;">—</div>
-                    <div style="text-align: center;">✔</div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div>Custom notification channels</div>
-                    <div style="text-align: center;">—</div>
-                    <div style="text-align: center;">✔</div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
-                    <div>Scoped AI agents per container: AI Contextual summaries & fix suggestions (private/local)</div>
-                    <div style="text-align: center;">—</div>
-                    <div style="text-align: center;">✔</div>
+# Open LogForge
+https://localhost:8444</code></pre>
                 </div>
             </div>
         </section>
 
+        <section id="features" class="section features-section" aria-labelledby="features-title">
+            <div class="section-heading">
+                <p class="eyebrow">Core Workflow</p>
+                <h2 id="features-title">From log keyword to automated fix.</h2>
+                <p>LogForge keeps the operational loop tight: watch Docker logs, match the keywords that matter, route the alert, and trigger the fix automation.</p>
+            </div>
 
-        <section style="text-align: center; margin-top: 4rem;">
-            <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">
-                LogForge is open source and built for devs who move fast.
-            </p>
-            <p style="margin-bottom: 0.5rem;">
-                ✨ Star us on Github to show support!
-            </p>
+            <div class="workflow-shell">
+                <div class="workflow-map" aria-label="LogForge workflow">
+                    <article class="workflow-step is-primary">
+                        <span>01</span>
+                        <h3>Watch logs</h3>
+                        <p>Stream Docker logs from local hosts and keep service state close to the containers that produced it.</p>
+                    </article>
+                    <article class="workflow-step">
+                        <span>02</span>
+                        <h3>Match keywords</h3>
+                        <p>Filter for errors, warnings, and custom patterns so alerts focus on the events that need action.</p>
+                    </article>
+                    <article class="workflow-step">
+                        <span>03</span>
+                        <h3>Trigger fixes</h3>
+                        <p>Route matched alerts into scoped fix automations that start remediation when the signal fires.</p>
+                    </article>
+                    <article class="workflow-step">
+                        <span>04</span>
+                        <h3>Verify outcomes</h3>
+                        <p>Check container state, alert history, and automation results before closing the loop.</p>
+                    </article>
+                </div>
 
-            <div style="display: inline-flex; align-items: center; gap: 0.5rem;">
-                <span style="font-size: 1.25rem;">⭐</span>
-                <iframe src="https://ghbtns.com/github-btn.html?user=log-forge&repo=logforge&type=star&count=true" frameborder="0" scrolling="0" width="100" height="20" title="GitHub Star Button" style="vertical-align: middle;"></iframe>
+                <figure class="dashboard-showcase">
+                    <div class="dashboard-frame-bar" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <img src="assets/logforge-overview.gif" alt="LogForge container dashboard showing service status, keyword alerts, and automation views" />
+                </figure>
             </div>
         </section>
 
-        <a id="compare"></a>
-        <section style="margin-top: 4rem; padding: 2rem 1rem; background-color: #f5f5f5; border-radius: 8px;">
-            <h2 style="text-align: center; font-size: 2rem; margin-bottom: 2rem;">🆚 How We Compare</h2>
-            <div style="max-width: 700px; margin: 0 auto; font-size: 1.1rem; line-height: 1.8; color: #444;">
-                <p><strong>Dozzle</strong> only works while you're watching.</p>
-                <p><strong>Papertrail</strong> charges for search and lacks real-time alerts.</p>
-                <p><strong>Datadog</strong> is heavy, expensive, and cloud-locked.</p>
-                <p><strong>Grafana + Loki</strong> requires complex setup and tuning.</p>
-                <p><strong>ELK Stack</strong> needs multiple services and constant babysitting.</p>
-                <p><strong>BetterStack</strong> is cloud-only and built for ops, not developer workflows.</p>
-                <p><strong>LogForge</strong> is always-on, self-hosted, alert-driven, and built for devs who want fast, clear feedback — no cloud, no config, no noise.</p>
+        <section id="enterprise" class="section enterprise-section" aria-labelledby="enterprise-title">
+            <div class="enterprise-control-room">
+                <div class="enterprise-intro">
+                    <p class="eyebrow">Enterprise Ready</p>
+                    <h2 id="enterprise-title">Control points for teams that want local ownership and operational polish.</h2>
+                    <p>LogForge adds the practical safeguards teams expect before alerting and fix automations become part of everyday infrastructure.</p>
+                </div>
+
+                <div class="enterprise-modules" aria-label="Enterprise capabilities">
+                    <article class="module-card module-primary">
+                        <span>Access</span>
+                        <h3>Local authentication</h3>
+                        <p>Keep sign-in, admin workflows, and team access close to the deployment.</p>
+                    </article>
+                    <article class="module-card">
+                        <span>Trust</span>
+                        <h3>mTLS enrollment</h3>
+                        <p>Enroll monitored endpoints with mutual TLS patterns before telemetry is accepted.</p>
+                    </article>
+                    <article class="module-card">
+                        <span>History</span>
+                        <h3>Durable telemetry</h3>
+                        <p>Pair live operational views with retained state for follow-up investigations.</p>
+                    </article>
+                    <article class="module-card">
+                        <span>Runtime</span>
+                        <h3>Hardened runtime</h3>
+                        <p>Use tighter defaults that fit shared hosts and production-like Docker environments.</p>
+                    </article>
+                    <article class="module-card">
+                        <span>Signals</span>
+                        <h3>Alert routing</h3>
+                        <p>Send matched keyword alerts to email, Discord, Slack, Telegram, Gotify, and webhook workflows.</p>
+                    </article>
+                    <article class="module-card">
+                        <span>Ops</span>
+                        <h3>Admin controls</h3>
+                        <p>Manage service state, access, retention, and dashboard operations from one surface.</p>
+                    </article>
+                </div>
+
+                <div class="proof-band" aria-label="Company proof band">
+                    <p>Trusted by users at</p>
+                    <div class="wordmark-list">
+                        <span>Netflix</span>
+                        <span>Microsoft</span>
+                        <span>Amazon</span>
+                        <span>Cisco</span>
+                        <span>Mercedes-Benz</span>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <a id="premium"></a>
-        <p style="font-size: 0.95rem; color: #777; text-align: center; margin-top: 2rem;">
-            Built by devs for devs — already used by fast-moving teams.
-        </p>
-
-        <section class="form-wrapper">
-            <h2>Interested in Premium?</h2>
-            <p>Get early access to premium features — <strong>spots are limited</strong>, so don't miss out.</p>
-            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe7D8ET0jccLyB7ufdlz3Lj9IEhLvrrvncpP8xzFvLgqYZGEQ/viewform?embedded=true" height="620">
-                Loading…
-            </iframe>
-            <div class="contact-bar">
-                <span>Questions? Contact us: <a href="mailto:logforge@gmail.com">logforge@gmail.com</a></span>
+        <section class="section support-section" aria-labelledby="support-title">
+            <div>
+                <p class="eyebrow">GitHub</p>
+                <h2 id="support-title">Follow LogForge on GitHub</h2>
+                <p>Track implementation notes, issue discussion, and product updates for Docker keyword alerts and fix automations.</p>
+            </div>
+            <div class="support-actions">
+                <a class="button secondary" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">Open GitHub Repo</a>
+                <iframe src="https://ghbtns.com/github-btn.html?user=log-forge&amp;repo=logforge&amp;type=star&amp;count=true" frameborder="0" scrolling="0" width="100" height="20" title="GitHub star button"></iframe>
             </div>
         </section>
 
-        <footer>
-            © 2025 LogForge — Made for dev environments 🐳
-        </footer>
+        <section id="compare" class="section compare-section" aria-labelledby="compare-title">
+            <div class="section-heading compact">
+                <p class="eyebrow">Compare</p>
+                <h2 id="compare-title">LogForge vs alternatives.</h2>
+            </div>
+
+            <div class="compare-layout">
+                <article class="compare-winner">
+                    <p class="compare-label">LogForge</p>
+                    <h3>LogForge turns Docker log keywords into alerts and fix automations without a cloud control plane.</h3>
+                    <div class="compare-chips" aria-label="LogForge strengths">
+                        <span>Local dashboard</span>
+                        <span>Keyword alerts</span>
+                        <span>Fix automations</span>
+                        <span>Container context</span>
+                    </div>
+                </article>
+
+                <div class="alternative-stack" aria-label="Alternative drawbacks">
+                    <p><strong>Dozzle</strong><span>Only works while you are watching.</span></p>
+                    <p><strong>Papertrail</strong><span>Charges for search and lacks real-time alerts.</span></p>
+                    <p><strong>Datadog</strong><span>Heavy, expensive, and cloud-locked.</span></p>
+                    <p><strong>Grafana and Loki</strong><span>Require complex setup and tuning.</span></p>
+                    <p><strong>ELK Stack</strong><span>Needs multiple services and constant maintenance.</span></p>
+                    <p><strong>BetterStack</strong><span>Cloud-only and built for ops, not developer workflows.</span></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section plans-section" aria-labelledby="plans-title">
+            <div class="section-heading">
+                <p class="eyebrow">Plans</p>
+                <h2 id="plans-title">Start free. Add premium depth when your team needs it.</h2>
+                <p>Free covers local keyword alerts. Premium adds scoped fix automations, automation history, role-based access, and per-container controls.</p>
+            </div>
+
+            <div class="plan-grid">
+                <article class="plan-card">
+                    <div class="plan-head">
+                        <p>Free</p>
+                        <h3>Keyword alerting essentials.</h3>
+                    </div>
+                    <div class="feature-chip-group" aria-label="Free plan features">
+                        <span>Real-time Docker logs</span>
+                        <span>Self-hosted alert dashboard</span>
+                        <span>Discord, Slack, Telegram, Gotify, and email</span>
+                        <span>Global alert keywords</span>
+                        <span>Optional AI-assisted alert summaries</span>
+                    </div>
+                </article>
+
+                <article class="plan-card plan-card-premium">
+                    <div class="plan-head">
+                        <p>Premium</p>
+                        <h3>Scoped automations for team operations.</h3>
+                    </div>
+                    <div class="feature-chip-group" aria-label="Premium plan features">
+                        <span>Scoped fix automations</span>
+                        <span>Automation history</span>
+                        <span>Role-based access control</span>
+                        <span>Per-container alert keywords</span>
+                        <span>Per-container automation controls</span>
+                        <span>Custom notification channels</span>
+                    </div>
+                    <a class="button primary" href="https://logforgedeposit.dev/#deposit" target="_blank" rel="noopener noreferrer">Reserve Your Spot</a>
+                </article>
+            </div>
+        </section>
+
+        <section id="premium" class="section premium-section" aria-labelledby="premium-title">
+            <div class="premium-copy">
+                <p class="eyebrow">Premium Deposit</p>
+                <h2 id="premium-title">Reserve premium access.</h2>
+                <p>Premium deposits reserve a place for advanced alerting and fix automation workflows and are credited toward the first paid plan. Deposits remain refundable before premium activation.</p>
+
+                <div class="deposit-terms" aria-label="Deposit terms">
+                    <span>Credited to first paid plan</span>
+                    <span>Refundable before activation</span>
+                    <span>Priority premium onboarding</span>
+                </div>
+
+                <a class="button primary" href="https://logforgedeposit.dev/#deposit" target="_blank" rel="noopener noreferrer">Reserve Your Spot</a>
+            </div>
+
+            <div class="form-wrapper">
+                <div class="form-intro">
+                    <p class="eyebrow">Application</p>
+                    <h3>Interested in Premium?</h3>
+                    <p>Join the early access list for premium features. Spots are limited.</p>
+                </div>
+                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe7D8ET0jccLyB7ufdlz3Lj9IEhLvrrvncpP8xzFvLgqYZGEQ/viewform?embedded=true" height="620" title="LogForge premium interest form">
+                    Loading...
+                </iframe>
+                <div class="contact-bar">
+                    <span>Questions? Contact us: <a href="mailto:logforge@gmail.com" target="_blank" rel="noopener noreferrer">logforge@gmail.com</a></span>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            document.body.classList.add('fade-in');
+    <footer class="site-footer">
+        <p>&copy; 2026 LogForge. Made for Docker keyword alerting and fix automations.</p>
+    </footer>
 
-            const hash = window.location.hash;
-            if (hash === "#premium") {
-                const targetWrapper = document.querySelector(".form-wrapper");
-                if (targetWrapper) {
-                    setTimeout(() => {
-                        targetWrapper.scrollIntoView({
-                            behavior: 'smooth'
-                        });
-
-                        // Add a glowing highlight
-                        targetWrapper.style.transition = 'box-shadow 0.5s ease';
-                        targetWrapper.style.boxShadow = '0 0 0 6px rgba(0, 200, 255, 0.5)';
-
-                        setTimeout(() => {
-                            targetWrapper.style.boxShadow = 'none';
-                        }, 2000);
-                    }, 300);
-                }
-            }
-        });
-    </script>
-
-
-
+    <script src="script.js"></script>
 </body>
 
 </html>
