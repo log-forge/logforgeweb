@@ -5,13 +5,18 @@
     <meta charset="UTF-8" />
     <meta name="google-site-verification" content="5gdbox0Q_wbktke-19hYoCBIcnkvSwL-Vssron53sCU" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="LogForge watches Docker logs for keyword alerts, routes signals, and triggers fix automations from a local Docker Compose deployment." />
-    <title>LogForge - Docker Keyword Alerts And Fix Automations</title>
+    <meta name="description" content="LogForge is a self-hosted Docker dashboard for real-time logs, alert rules, notifications, file access, and safe remediation." />
+    <title>LogForge - Docker Alerts That Fix Themselves</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="icon" href="assets/logo-32x32.ico" type="image/x-icon" />
     <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
+    <div class="page-grid" aria-hidden="true"></div>
+
     <header class="site-header">
         <a class="brand" href="#top" aria-label="LogForge home">
             <img src="assets/logforge-Icon-transparent-512x512.png" alt="" />
@@ -19,11 +24,12 @@
         </a>
 
         <nav class="site-nav" aria-label="Primary navigation">
-            <a href="#install">Install</a>
-            <a href="#features">Features</a>
-            <a href="#enterprise">Enterprise</a>
+            <a href="#flow">Live flow</a>
+            <a href="#incident">Incident delta</a>
             <a href="#compare">Compare</a>
+            <a href="#templates">Templates</a>
             <a href="#premium">Premium</a>
+            <a href="#install">Install</a>
         </nav>
 
         <a class="header-cta" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -31,67 +37,529 @@
 
     <main id="top">
         <section class="hero" aria-labelledby="hero-title">
-            <figure class="hero-backdrop" aria-hidden="true">
-                <img src="assets/logforge-home.png" alt="" />
-            </figure>
+            <div class="hero-copy">
+                <p class="mono-label">// docker.control</p>
+                <h1 id="hero-title">Docker alerts that fix themselves.</h1>
+                <p class="hero-subhead">Self-hosted Docker dashboard for local and agent-forwarded logs, alert rules, notifications, file access, and safe remediation.</p>
+                <div class="action-row" aria-label="Primary actions">
+                    <a class="button button-primary" href="#install">Install LogForge</a>
+                    <a class="button button-secondary" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">View GitHub</a>
+                </div>
+                <p class="demo-callout">
+                    Want the operator walkthrough?
+                    <a href="https://calendly.com/madanb1313/logforge-demo" target="_blank" rel="noopener noreferrer">Book a demo</a>
+                </p>
+                <div class="signal-strip" aria-label="Product capabilities">
+                    <span>logs</span>
+                    <span>alert rules</span>
+                    <span>notifiers</span>
+                    <span>guarded fixes</span>
+                    <span>edge agents</span>
+                </div>
+            </div>
 
-            <div class="hero-layout">
-                <div class="hero-content">
-                    <p class="eyebrow">Docker alerts that act</p>
-                    <h1 id="hero-title">Catch alerts. Trigger fixes.</h1>
-                    <p id="animated-tagline" class="animated-tagline" aria-live="polite"></p>
-                    <p class="hero-copy">
-                        LogForge watches Docker logs for the keywords you care about, routes the alert, and kicks off the automation that fixes it. Run it locally with Docker Compose and keep operational data close to your hosts.
-                    </p>
-                    <div class="action-row" aria-label="Primary actions">
-                        <a class="button primary" href="#install">Install LogForge</a>
-                        <a class="button secondary" href="https://logforgedeposit.dev/#deposit" target="_blank" rel="noopener noreferrer">Reserve Your Spot</a>
-                    </div>
+            <aside class="control-room" aria-label="Live Docker control room">
+                <div class="window-bar">
+                    <span class="window-dot"></span>
+                    <span class="window-dot"></span>
+                    <span class="window-dot"></span>
+                    <span class="window-title">logforge://control-room</span>
+                    <span class="window-status">live</span>
                 </div>
 
-                <aside class="hero-panel" aria-label="LogForge capabilities">
-                    <div>
-                        <span>Keyword alerts</span>
-                        <strong>Match the log patterns that actually matter.</strong>
+                <div class="room-grid">
+                    <section class="console-panel service-map" aria-label="Container status">
+                        <div class="panel-heading">
+                            <span>// containers</span>
+                            <strong>4 online</strong>
+                        </div>
+                        <div class="container-list">
+                            <article>
+                                <span class="status-dot ok"></span>
+                                <div>
+                                    <strong>api-gateway</strong>
+                                    <span>healthy | 18ms p95</span>
+                                </div>
+                                <em>stable</em>
+                            </article>
+                            <article class="is-hot">
+                                <span class="status-dot warn"></span>
+                                <div>
+                                    <strong>worker-02</strong>
+                                    <span>restart loop | 5 events</span>
+                                </div>
+                                <em>alert</em>
+                            </article>
+                            <article>
+                                <span class="status-dot ok"></span>
+                                <div>
+                                    <strong>postgres</strong>
+                                    <span>local volume | 72% disk</span>
+                                </div>
+                                <em>watch</em>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="console-panel log-panel" aria-label="Live log stream">
+                        <div class="panel-heading">
+                            <span>// live.logs</span>
+                            <strong>worker-02</strong>
+                        </div>
+                        <ol id="hero-log-stream" class="log-stream" aria-live="polite"></ol>
+                    </section>
+
+                    <section class="console-panel rule-panel" aria-label="Alert rule evaluation">
+                        <div class="panel-heading">
+                            <span>// alert.delta</span>
+                            <strong>matched</strong>
+                        </div>
+                        <pre><code>rule "oom_guard"
+match: /OutOfMemoryError|restart loop/
+window: 3 events / 60 sec
+notify: slack, gotify, webhook
+action: restart container
+guard: cooldown 10m + backoff</code></pre>
+                    </section>
+
+                    <section class="console-panel timeline-panel" aria-label="Notification and remediation timeline">
+                        <div class="panel-heading">
+                            <span>// remediation.timeline</span>
+                            <strong>30 sec</strong>
+                        </div>
+                        <ol>
+                            <li><span>00:01</span> threshold crossed</li>
+                            <li><span>00:04</span> Slack + Gotify dispatched</li>
+                            <li><span>00:10</span> cooldown gate checked</li>
+                            <li><span>00:28</span> restart executed safely</li>
+                        </ol>
+                    </section>
+                </div>
+            </aside>
+        </section>
+
+        <section class="proof-band" aria-label="Company proof">
+            <p>Used by Developers at</p>
+            <div class="company-chips">
+                <span>Cisco</span>
+                <span>Netflix</span>
+                <span>Microsoft</span>
+                <span>Amazon</span>
+            </div>
+        </section>
+
+        <section id="incident" class="section incident-section" aria-labelledby="incident-title">
+            <div class="section-kicker">
+                <p class="mono-label">// incident.delta</p>
+                <h2 id="incident-title">Container incident. Minute one. Without vs with LogForge.</h2>
+            </div>
+
+            <div class="delta-grid">
+                <article class="delta-card without-card">
+                    <div class="delta-head">
+                        <span>WITHOUT LOGFORGE</span>
+                        <strong>45 min</strong>
                     </div>
-                    <div>
-                        <span>Fix automations</span>
-                        <strong>Trigger remediation when an alert fires.</strong>
+                    <h3>SSH, scroll, guess, restart.</h3>
+                    <ul>
+                        <li>SSH into the host after users report errors.</li>
+                        <li>Run <code>docker logs</code> and scan for the first useful stack trace.</li>
+                        <li>Miss the alert window while checking the wrong container.</li>
+                        <li>Manually restart and hope it was the right fix.</li>
+                    </ul>
+                </article>
+
+                <article class="delta-card with-card">
+                    <div class="delta-head">
+                        <span>WITH LOGFORGE</span>
+                        <strong>30 sec</strong>
                     </div>
-                    <div>
-                        <span>Local control</span>
-                        <strong>Run the alerting and automation loop on your own Docker hosts.</strong>
+                    <h3>Rule fires, route sends, guard fixes.</h3>
+                    <ul>
+                        <li>Rule template catches <code>OutOfMemoryError</code> and restart loops.</li>
+                        <li>Notifier sends to Slack, Discord, Telegram, Gotify, Teams, Pushover, SMS, email, or webhook.</li>
+                        <li>Gatekeeper applies cooldown and backoff before restart, stop, kill, start, or script action.</li>
+                        <li>Alert history records the event, action, and final outcome.</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <section id="flow" class="section flow-section" aria-labelledby="flow-title">
+            <div class="section-intro">
+                <p class="mono-label">// live.pipeline</p>
+                <h2 id="flow-title">The operational loop, rendered live.</h2>
+                <p>Local Docker logs can be tailed directly, while enrolled edge agents forward remote host logs into central LogForge. From there rules match known failure patterns, the alert engine checks the timeline, notifiers route the signal, and the gatekeeper controls remediation.</p>
+            </div>
+
+            <div class="flow-console">
+                <div class="flow-rail" aria-label="Flow stages">
+                    <button class="flow-node is-active" type="button" data-flow-step="0">
+                        <span>01</span>
+                        <strong>collect</strong>
+                    </button>
+                    <button class="flow-node" type="button" data-flow-step="1">
+                        <span>02</span>
+                        <strong>forward</strong>
+                    </button>
+                    <button class="flow-node" type="button" data-flow-step="2">
+                        <span>03</span>
+                        <strong>match</strong>
+                    </button>
+                    <button class="flow-node" type="button" data-flow-step="3">
+                        <span>04</span>
+                        <strong>evaluate</strong>
+                    </button>
+                    <button class="flow-node" type="button" data-flow-step="4">
+                        <span>05</span>
+                        <strong>notify</strong>
+                    </button>
+                    <button class="flow-node" type="button" data-flow-step="5">
+                        <span>06</span>
+                        <strong>remediate</strong>
+                    </button>
+                </div>
+
+                <div class="flow-stage">
+                    <div class="flow-visual" aria-hidden="true">
+                        <span class="packet packet-one"></span>
+                        <span class="packet packet-two"></span>
+                        <span class="packet packet-three"></span>
+                        <div class="flow-column">
+                            <span>source</span>
+                            <strong>docker logs</strong>
+                        </div>
+                        <div class="flow-column">
+                            <span>agent</span>
+                            <strong>forward logs</strong>
+                        </div>
+                        <div class="flow-column">
+                            <span>template</span>
+                            <strong>OOM / loop</strong>
+                        </div>
+                        <div class="flow-column">
+                            <span>engine</span>
+                            <strong>threshold</strong>
+                        </div>
+                        <div class="flow-column">
+                            <span>route</span>
+                            <strong>9 channels</strong>
+                        </div>
+                        <div class="flow-column">
+                            <span>gate</span>
+                            <strong>safe action</strong>
+                        </div>
+                    </div>
+
+                    <div class="flow-detail">
+                        <div>
+                            <span class="mono-label" id="flow-step-label">// ingest.collect</span>
+                            <h3 id="flow-step-title">Docker logs enter LogForge.</h3>
+                            <p id="flow-step-copy">Tail local Docker containers out of the box, or accept forwarded logs from enrolled edge agents into a central LogForge host.</p>
+                        </div>
+                        <pre><code id="flow-step-code">source: docker://worker-02
+line: java.lang.OutOfMemoryError
+state: collected
+next: agent.forward</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="use-cases" class="section use-case-section" aria-labelledby="use-case-title">
+            <div class="section-intro compact">
+                <p class="mono-label">// operator.tabs</p>
+                <h2 id="use-case-title">Use cases by operator mode.</h2>
+            </div>
+
+            <div class="tabs" data-tabs>
+                <div class="tab-list" role="tablist" aria-label="LogForge use cases">
+                    <button class="tab-button is-active" id="tab-home" type="button" role="tab" aria-selected="true" aria-controls="panel-home" data-tab="home">Home lab operator</button>
+                    <button class="tab-button" id="tab-solo" type="button" role="tab" aria-selected="false" aria-controls="panel-solo" data-tab="solo">Solo developer</button>
+                    <button class="tab-button" id="tab-platform" type="button" role="tab" aria-selected="false" aria-controls="panel-platform" data-tab="platform">Platform team</button>
+                    <button class="tab-button" id="tab-msp" type="button" role="tab" aria-selected="false" aria-controls="panel-msp" data-tab="msp">MSP/consultant</button>
+                </div>
+
+                <div class="tab-panels">
+                    <article class="tab-panel is-active" id="panel-home" role="tabpanel" aria-labelledby="tab-home" data-tab-panel="home">
+                        <div>
+                            <p class="mono-label">// home.lab</p>
+                            <h3>Catch container drift before a side project goes quiet.</h3>
+                            <p>Monitor NAS apps, media services, dashboards, and local automations from one browser surface.</p>
+                        </div>
+                        <pre><code>query: containers where restart_count &gt; 3 in 10m
+result: plex-worker entered restart loop
+route: gotify + email
+action: restart after cooldown</code></pre>
+                    </article>
+
+                    <article class="tab-panel" id="panel-solo" role="tabpanel" aria-labelledby="tab-solo" data-tab-panel="solo" hidden>
+                        <div>
+                            <p class="mono-label">// solo.dev</p>
+                            <h3>Keep local services honest while you ship.</h3>
+                            <p>Use rule templates to flag logs that normally vanish in a terminal tab you closed an hour ago.</p>
+                        </div>
+                        <pre><code>query: logs contains "database connection refused"
+result: api cannot reach postgres
+route: desktop webhook + slack
+action: run ./scripts/reconnect-db.sh</code></pre>
+                    </article>
+
+                    <article class="tab-panel" id="panel-platform" role="tabpanel" aria-labelledby="tab-platform" data-tab-panel="platform" hidden>
+                        <div>
+                            <p class="mono-label">// platform.team</p>
+                            <h3>Give developers a Docker-native incident console.</h3>
+                            <p>Run a central LogForge host that consumes forwarded logs from enrolled agents, standardizes alert rules, and keeps remediation visible without handing every workflow to a cloud APM.</p>
+                        </div>
+                        <pre><code>query: service=checkout severity=error rate &gt; 20/min
+source: agents=edge-a, edge-b
+result: error flood confirmed across 2 hosts
+route: teams + pager webhook
+action: block repeated restarts for 10m</code></pre>
+                    </article>
+
+                    <article class="tab-panel" id="panel-msp" role="tabpanel" aria-labelledby="tab-msp" data-tab-panel="msp" hidden>
+                        <div>
+                            <p class="mono-label">// consultant.ops</p>
+                            <h3>Operate client Docker edges from one trusted host.</h3>
+                            <p>Enroll trusted agents per client or site, forward logs into central LogForge, and use alert history as the handoff record.</p>
+                        </div>
+                        <pre><code>query: client=edge-node disk_free &lt; 12%
+source: agent://client-a-edge-03
+result: low disk on docker volume
+route: pushover + webhook
+action: run guarded cleanup script</code></pre>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="templates" class="section templates-section" aria-labelledby="templates-title">
+            <div class="section-intro">
+                <p class="mono-label">// rule.templates</p>
+                <h2 id="templates-title">Templates for the failures Docker operators already know.</h2>
+                <p>Start from known failure modes, tune thresholds per container, and keep the rule language close to the runtime symptoms.</p>
+            </div>
+
+            <div class="template-grid">
+                <article>
+                    <span>STABILITY</span>
+                    <h3>Restart loop</h3>
+                    <p>Crash loop, restart loop, failed start.</p>
+                </article>
+                <article>
+                    <span>PERFORMANCE</span>
+                    <h3>Resource pressure</h3>
+                    <p>High CPU, high memory, low disk.</p>
+                </article>
+                <article>
+                    <span>LOGS</span>
+                    <h3>Error patterns</h3>
+                    <p>Error flood, OOM, database connection issues.</p>
+                </article>
+                <article>
+                    <span>SECURITY</span>
+                    <h3>Suspicious activity</h3>
+                    <p>Unauthorized access and suspicious network activity.</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="compare" class="section compare-section" aria-labelledby="compare-title">
+            <div class="section-intro">
+                <p class="mono-label">// benchmark.compare</p>
+                <h2 id="compare-title">Logs vs action</h2>
+                <p>Other tools show logs. LogForge turns them into alerts, routes, and fixes.</p>
+            </div>
+
+            <div class="compare-table-wrap" role="region" aria-label="LogForge comparison table" tabindex="0">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">category</th>
+                            <th scope="col">others</th>
+                            <th scope="col">logforge</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">VISIBILITY</th>
+                            <td><span class="mark yes">✓</span> log viewer</td>
+                            <td><span class="mark yes">✓</span> real-time Docker dashboard</td>
+                        </tr>
+                        <tr class="logforge-row">
+                            <th scope="row">VISIBILITY</th>
+                            <td><span class="mark no">×</span> context split across tools</td>
+                            <td><span class="mark yes">✓</span> logs, files, containers, and history together</td>
+                        </tr>
+                        <tr class="logforge-row">
+                            <th scope="row">ALERTING</th>
+                            <td><span class="mark no">×</span> manual search or external setup</td>
+                            <td><span class="mark yes">✓</span> rule templates for OOM, restart loops, floods, and thresholds</td>
+                        </tr>
+                        <tr class="logforge-row">
+                            <th scope="row">ALERTING</th>
+                            <td><span class="mark no">×</span> narrow notification paths</td>
+                            <td><span class="mark yes">✓</span> Slack, Discord, Telegram, Gotify, Teams, Pushover, SMS, email, webhook</td>
+                        </tr>
+                        <tr class="logforge-row">
+                            <th scope="row">REMEDIATION</th>
+                            <td><span class="mark no">×</span> stops at awareness</td>
+                            <td><span class="mark yes">✓</span> restart, stop, kill, start, or script action with cooldown and backoff</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">CONTROL</th>
+                            <td><span class="mark yes">✓</span> single-host dashboards or separate agents</td>
+                            <td><span class="mark yes">✓</span> central LogForge host with enrolled edge agents across Docker hosts</td>
+                        </tr>
+                        <tr class="logforge-row">
+                            <th scope="row">PERFORMANCE</th>
+                            <td><span class="mark no">×</span> remote tailing, SSH polling, or noisy side channels</td>
+                            <td><span class="mark yes">✓</span> forwarded logs and events consumed by central LogForge</td>
+                        </tr>
+                        <tr class="logforge-row">
+                            <th scope="row">PRIVACY</th>
+                            <td><span class="mark no">×</span> cloud-first log shipping</td>
+                            <td><span class="mark yes">✓</span> self-hosted control plane for local and agent-forwarded operational data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section mesh-section" aria-labelledby="mesh-title">
+            <div class="mesh-layout">
+                <div class="mesh-copy">
+                    <p class="mono-label">// enterprise.mesh</p>
+                    <h2 id="mesh-title">One central host. Every Docker edge in view.</h2>
+                    <p>Businesses, platform teams, MSPs, and distributed operators can run LogForge on a central host, enroll trusted edge agents, and monitor multiple Docker machines without depending only on central-side tailing.</p>
+                    <p>Tailed local logs still work out of the box. The latest high-performance path is agent-forwarded logs and events into central LogForge.</p>
+                </div>
+
+                <aside class="mesh-console" aria-label="Central LogForge agent mesh">
+                    <div class="window-bar">
+                        <span class="window-dot"></span>
+                        <span class="window-dot"></span>
+                        <span class="window-dot"></span>
+                        <span class="window-title">logforge://enterprise-mesh</span>
+                        <span class="window-status">agents live</span>
+                    </div>
+                    <div class="mesh-body">
+                        <ol class="mesh-routes">
+                            <li>
+                                <span>edge-agent-01</span>
+                                <strong>logs/events -&gt;</strong>
+                                <em>central.logforge</em>
+                            </li>
+                            <li>
+                                <span>edge-agent-02</span>
+                                <strong>logs/events -&gt;</strong>
+                                <em>central.logforge</em>
+                            </li>
+                            <li>
+                                <span>edge-agent-03</span>
+                                <strong>logs/events -&gt;</strong>
+                                <em>central.logforge</em>
+                            </li>
+                        </ol>
+                        <div class="central-node">
+                            <span>central.logforge</span>
+                            <strong>rules + routes + history + guarded actions</strong>
+                        </div>
                     </div>
                 </aside>
             </div>
         </section>
 
-        <section id="install" class="section install-section" aria-labelledby="install-title">
-            <div class="install-command-center">
-                <div class="install-copy">
-                    <p class="eyebrow">Install</p>
-                    <h2 id="install-title">Install the alerting and automation loop locally.</h2>
-                    <p>Clone the repository, start the services, and open LogForge on your machine to watch logs, match keywords, route alerts, and trigger fixes close to your hosts.</p>
+        <section id="security" class="section security-section" aria-labelledby="security-title">
+            <div class="section-intro compact">
+                <p class="mono-label">// local.control</p>
+                <h2 id="security-title">Self-hosted by default, cautious by design.</h2>
+            </div>
 
-                    <div class="install-status-grid" aria-label="Install readiness">
-                        <article>
-                            <span>Runtime</span>
-                            <strong>Docker Compose</strong>
-                        </article>
-                        <article>
-                            <span>Endpoint</span>
-                            <strong>localhost:8444</strong>
-                        </article>
-                        <article>
-                            <span>Scope</span>
-                            <strong>Local alerts</strong>
-                        </article>
+            <div class="security-grid">
+                <article>
+                    <span>SELF-HOSTED</span>
+                    <p>Run LogForge in your Docker environment and keep the control loop close to the host.</p>
+                </article>
+                <article>
+                    <span>LOCAL DATA</span>
+                    <p>Keep logs, alert rules, action results, and history in your own deployment.</p>
+                </article>
+                <article>
+                    <span>DOCKER SOCKET AWARENESS</span>
+                    <p>Make container actions visible and intentional instead of hiding them behind generic webhooks.</p>
+                </article>
+                <article>
+                    <span>LOCAL ADMIN</span>
+                    <p>Manage operators, alert rules, channels, and guarded actions from the local admin surface.</p>
+                </article>
+                <article>
+                    <span>CENTRAL + EDGE</span>
+                    <p>Run a central LogForge host and enroll trusted edge agents over mTLS for remote Docker nodes.</p>
+                </article>
+                <article>
+                    <span>FORWARDED LOGS</span>
+                    <p>Use agents to forward logs and events into central LogForge for the latest high-performance path. Local tailing remains the simple out-of-the-box setup.</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="premium" class="section premium-section" aria-labelledby="premium-title">
+            <div class="premium-layout">
+                <div class="premium-copy">
+                    <p class="mono-label">// premium.waitlist</p>
+                    <h2 id="premium-title">Premium for central and edge operators.</h2>
+                    <p>Join the waitlist for advanced central host workflows, enterprise agent management, and support options for teams that monitor Docker across multiple machines.</p>
+                    <ul class="premium-points">
+                        <li>Central host visibility for enrolled Docker edges.</li>
+                        <li>Priority planning for platform teams, MSPs, and distributed operators.</li>
+                        <li>Premium rollout details sent as they become available.</li>
+                    </ul>
+                </div>
+
+                <form id="premium-form" class="premium-form" action="https://docs.google.com/forms/d/e/1FAIpQLSe7D8ET0jccLyB7ufdlz3Lj9IEhLvrrvncpP8xzFvLgqYZGEQ/formResponse" method="POST" target="_blank">
+                    <div class="code-header">
+                        <span>waitlist.form</span>
+                        <strong>premium</strong>
+                    </div>
+                    <div class="premium-form-body">
+                        <label for="premium-email">
+                            <span>Email</span>
+                            <input id="premium-email" name="entry.475791116" type="email" autocomplete="email" placeholder="ops@example.com" required />
+                        </label>
+                        <label for="premium-team-size">
+                            <span>Team size</span>
+                            <select id="premium-team-size" name="entry.1033853757">
+                                <option value="1 - 10 people">1 - 10 people</option>
+                                <option value="11 - 49 people">11 - 49 people</option>
+                                <option value="50 + people">50 + people</option>
+                            </select>
+                        </label>
+                        <button class="button button-primary premium-submit" type="submit">Join waitlist</button>
+                        <p id="premium-form-status" class="form-status" role="status" aria-live="polite"></p>
+                        <a class="form-fallback" href="https://docs.google.com/forms/d/e/1FAIpQLSe7D8ET0jccLyB7ufdlz3Lj9IEhLvrrvncpP8xzFvLgqYZGEQ/viewform" target="_blank" rel="noopener noreferrer">Open Google Form</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section id="install" class="section install-section" aria-labelledby="install-title">
+            <div class="install-layout">
+                <div>
+                    <p class="mono-label">// install.local</p>
+                    <h2 id="install-title">Install LogForge on a local or central Docker host.</h2>
+                    <p>Clone the repository, start the Compose stack, and open the dashboard. Start with local Docker tailing out of the box, then enroll edge agents when you want remote hosts forwarding logs to the central deployment.</p>
+                    <div class="install-stats" aria-label="Install summary">
+                        <span>Docker Compose</span>
+                        <span>localhost:8444</span>
+                        <span>self-hosted</span>
                     </div>
                 </div>
 
                 <div class="install-card">
                     <div class="code-header">
-                        <span>Docker Compose quick start</span>
+                        <span>terminal</span>
                         <button id="copy-install" class="copy-button" type="button" data-copy-target="install-snippet">
                             <span class="copy-default">Copy</span>
                             <span class="copy-success">Copied</span>
@@ -108,217 +576,11 @@ https://localhost:8444</code></pre>
                 </div>
             </div>
         </section>
-
-        <section id="features" class="section features-section" aria-labelledby="features-title">
-            <div class="section-heading">
-                <p class="eyebrow">Core Workflow</p>
-                <h2 id="features-title">From log keyword to automated fix.</h2>
-                <p>LogForge keeps the operational loop tight: watch Docker logs, match the keywords that matter, route the alert, and trigger the fix automation.</p>
-            </div>
-
-            <div class="workflow-shell">
-                <div class="workflow-map" aria-label="LogForge workflow">
-                    <article class="workflow-step is-primary">
-                        <span>01</span>
-                        <h3>Watch logs</h3>
-                        <p>Stream Docker logs from local hosts and keep service state close to the containers that produced it.</p>
-                    </article>
-                    <article class="workflow-step">
-                        <span>02</span>
-                        <h3>Match keywords</h3>
-                        <p>Filter for errors, warnings, and custom patterns so alerts focus on the events that need action.</p>
-                    </article>
-                    <article class="workflow-step">
-                        <span>03</span>
-                        <h3>Trigger fixes</h3>
-                        <p>Route matched alerts into scoped fix automations that start remediation when the signal fires.</p>
-                    </article>
-                    <article class="workflow-step">
-                        <span>04</span>
-                        <h3>Verify outcomes</h3>
-                        <p>Check container state, alert history, and automation results before closing the loop.</p>
-                    </article>
-                </div>
-
-                <figure class="dashboard-showcase">
-                    <div class="dashboard-frame-bar" aria-hidden="true">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                    <img src="assets/logforge-overview.gif" alt="LogForge container dashboard showing service status, keyword alerts, and automation views" />
-                </figure>
-            </div>
-        </section>
-
-        <section id="enterprise" class="section enterprise-section" aria-labelledby="enterprise-title">
-            <div class="enterprise-control-room">
-                <div class="enterprise-intro">
-                    <p class="eyebrow">Enterprise Ready</p>
-                    <h2 id="enterprise-title">Control points for teams that want local ownership and operational polish.</h2>
-                    <p>LogForge adds the practical safeguards teams expect before alerting and fix automations become part of everyday infrastructure.</p>
-                </div>
-
-                <div class="enterprise-modules" aria-label="Enterprise capabilities">
-                    <article class="module-card module-primary">
-                        <span>Access</span>
-                        <h3>Local authentication</h3>
-                        <p>Keep sign-in, admin workflows, and team access close to the deployment.</p>
-                    </article>
-                    <article class="module-card">
-                        <span>Trust</span>
-                        <h3>mTLS enrollment</h3>
-                        <p>Enroll monitored endpoints with mutual TLS patterns before telemetry is accepted.</p>
-                    </article>
-                    <article class="module-card">
-                        <span>History</span>
-                        <h3>Durable telemetry</h3>
-                        <p>Pair live operational views with retained state for follow-up investigations.</p>
-                    </article>
-                    <article class="module-card">
-                        <span>Runtime</span>
-                        <h3>Hardened runtime</h3>
-                        <p>Use tighter defaults that fit shared hosts and production-like Docker environments.</p>
-                    </article>
-                    <article class="module-card">
-                        <span>Signals</span>
-                        <h3>Alert routing</h3>
-                        <p>Send matched keyword alerts to email, Discord, Slack, Telegram, Gotify, and webhook workflows.</p>
-                    </article>
-                    <article class="module-card">
-                        <span>Ops</span>
-                        <h3>Admin controls</h3>
-                        <p>Manage service state, access, retention, and dashboard operations from one surface.</p>
-                    </article>
-                </div>
-
-                <div class="proof-band" aria-label="Company proof band">
-                    <p>Trusted by users at</p>
-                    <div class="wordmark-list">
-                        <span>Netflix</span>
-                        <span>Microsoft</span>
-                        <span>Amazon</span>
-                        <span>Cisco</span>
-                        <span>Mercedes-Benz</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section support-section" aria-labelledby="support-title">
-            <div>
-                <p class="eyebrow">GitHub</p>
-                <h2 id="support-title">Follow LogForge on GitHub</h2>
-                <p>Track implementation notes, issue discussion, and product updates for Docker keyword alerts and fix automations.</p>
-            </div>
-            <div class="support-actions">
-                <a class="button secondary" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">Open GitHub Repo</a>
-                <iframe src="https://ghbtns.com/github-btn.html?user=log-forge&amp;repo=logforge&amp;type=star&amp;count=true" frameborder="0" scrolling="0" width="100" height="20" title="GitHub star button"></iframe>
-            </div>
-        </section>
-
-        <section id="compare" class="section compare-section" aria-labelledby="compare-title">
-            <div class="section-heading compact">
-                <p class="eyebrow">Compare</p>
-                <h2 id="compare-title">LogForge vs alternatives.</h2>
-            </div>
-
-            <div class="compare-layout">
-                <article class="compare-winner">
-                    <p class="compare-label">LogForge</p>
-                    <h3>LogForge turns Docker log keywords into alerts and fix automations without a cloud control plane.</h3>
-                    <div class="compare-chips" aria-label="LogForge strengths">
-                        <span>Local dashboard</span>
-                        <span>Keyword alerts</span>
-                        <span>Fix automations</span>
-                        <span>Container context</span>
-                    </div>
-                </article>
-
-                <div class="alternative-stack" aria-label="Alternative drawbacks">
-                    <p><strong>Dozzle</strong><span>Only works while you are watching.</span></p>
-                    <p><strong>Papertrail</strong><span>Charges for search and lacks real-time alerts.</span></p>
-                    <p><strong>Datadog</strong><span>Heavy, expensive, and cloud-locked.</span></p>
-                    <p><strong>Grafana and Loki</strong><span>Require complex setup and tuning.</span></p>
-                    <p><strong>ELK Stack</strong><span>Needs multiple services and constant maintenance.</span></p>
-                    <p><strong>BetterStack</strong><span>Cloud-only and built for ops, not developer workflows.</span></p>
-                </div>
-            </div>
-        </section>
-
-        <section class="section plans-section" aria-labelledby="plans-title">
-            <div class="section-heading">
-                <p class="eyebrow">Plans</p>
-                <h2 id="plans-title">Start free. Add premium depth when your team needs it.</h2>
-                <p>Free covers local keyword alerts. Premium adds scoped fix automations, automation history, role-based access, and per-container controls.</p>
-            </div>
-
-            <div class="plan-grid">
-                <article class="plan-card">
-                    <div class="plan-head">
-                        <p>Free</p>
-                        <h3>Keyword alerting essentials.</h3>
-                    </div>
-                    <div class="feature-chip-group" aria-label="Free plan features">
-                        <span>Real-time Docker logs</span>
-                        <span>Self-hosted alert dashboard</span>
-                        <span>Discord, Slack, Telegram, Gotify, and email</span>
-                        <span>Global alert keywords</span>
-                        <span>Optional AI-assisted alert summaries</span>
-                    </div>
-                </article>
-
-                <article class="plan-card plan-card-premium">
-                    <div class="plan-head">
-                        <p>Premium</p>
-                        <h3>Scoped automations for team operations.</h3>
-                    </div>
-                    <div class="feature-chip-group" aria-label="Premium plan features">
-                        <span>Scoped fix automations</span>
-                        <span>Automation history</span>
-                        <span>Role-based access control</span>
-                        <span>Per-container alert keywords</span>
-                        <span>Per-container automation controls</span>
-                        <span>Custom notification channels</span>
-                    </div>
-                    <a class="button primary" href="https://logforgedeposit.dev/#deposit" target="_blank" rel="noopener noreferrer">Reserve Your Spot</a>
-                </article>
-            </div>
-        </section>
-
-        <section id="premium" class="section premium-section" aria-labelledby="premium-title">
-            <div class="premium-copy">
-                <p class="eyebrow">Premium Deposit</p>
-                <h2 id="premium-title">Reserve premium access.</h2>
-                <p>Premium deposits reserve a place for advanced alerting and fix automation workflows and are credited toward the first paid plan. Deposits remain refundable before premium activation.</p>
-
-                <div class="deposit-terms" aria-label="Deposit terms">
-                    <span>Credited to first paid plan</span>
-                    <span>Refundable before activation</span>
-                    <span>Priority premium onboarding</span>
-                </div>
-
-                <a class="button primary" href="https://logforgedeposit.dev/#deposit" target="_blank" rel="noopener noreferrer">Reserve Your Spot</a>
-            </div>
-
-            <div class="form-wrapper">
-                <div class="form-intro">
-                    <p class="eyebrow">Application</p>
-                    <h3>Interested in Premium?</h3>
-                    <p>Join the early access list for premium features. Spots are limited.</p>
-                </div>
-                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe7D8ET0jccLyB7ufdlz3Lj9IEhLvrrvncpP8xzFvLgqYZGEQ/viewform?embedded=true" height="620" title="LogForge premium interest form">
-                    Loading...
-                </iframe>
-                <div class="contact-bar">
-                    <span>Questions? Contact us: <a href="mailto:logforge@gmail.com" target="_blank" rel="noopener noreferrer">logforge@gmail.com</a></span>
-                </div>
-            </div>
-        </section>
     </main>
 
     <footer class="site-footer">
-        <p>&copy; 2026 LogForge. Made for Docker keyword alerting and fix automations.</p>
+        <p>&copy; 2026 LogForge. Docker alerts, routes, and guarded fixes from your own host.</p>
+        <a href="mailto:logforge@gmail.com">logforge@gmail.com</a>
     </footer>
 
     <script src="script.js"></script>
