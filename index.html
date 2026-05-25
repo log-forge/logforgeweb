@@ -28,6 +28,7 @@
             <a href="#incident">Incident delta</a>
             <a href="#compare">Compare</a>
             <a href="#templates">Templates</a>
+            <a href="#premium">Premium</a>
             <a href="#install">Install</a>
         </nav>
 
@@ -39,7 +40,7 @@
             <div class="hero-copy">
                 <p class="mono-label">// docker.control</p>
                 <h1 id="hero-title">Docker alerts that fix themselves.</h1>
-                <p class="hero-subhead">Self-hosted Docker dashboard for real-time logs, alert rules, notifications, file access, and safe remediation.</p>
+                <p class="hero-subhead">Self-hosted Docker dashboard for local and agent-forwarded logs, alert rules, notifications, file access, and safe remediation.</p>
                 <div class="action-row" aria-label="Primary actions">
                     <a class="button button-primary" href="#install">Install LogForge</a>
                     <a class="button button-secondary" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">View GitHub</a>
@@ -53,6 +54,7 @@
                     <span>alert rules</span>
                     <span>notifiers</span>
                     <span>guarded fixes</span>
+                    <span>edge agents</span>
                 </div>
             </div>
 
@@ -187,29 +189,33 @@ guard: cooldown 10m + backoff</code></pre>
             <div class="section-intro">
                 <p class="mono-label">// live.pipeline</p>
                 <h2 id="flow-title">The operational loop, rendered live.</h2>
-                <p>Docker log stream enters LogForge, rules match known failure patterns, the alert engine checks the timeline, notifiers route the signal, and the gatekeeper controls remediation.</p>
+                <p>Local Docker logs can be tailed directly, while enrolled edge agents forward remote host logs into central LogForge. From there rules match known failure patterns, the alert engine checks the timeline, notifiers route the signal, and the gatekeeper controls remediation.</p>
             </div>
 
             <div class="flow-console">
                 <div class="flow-rail" aria-label="Flow stages">
                     <button class="flow-node is-active" type="button" data-flow-step="0">
                         <span>01</span>
-                        <strong>stream</strong>
+                        <strong>collect</strong>
                     </button>
                     <button class="flow-node" type="button" data-flow-step="1">
                         <span>02</span>
-                        <strong>match</strong>
+                        <strong>forward</strong>
                     </button>
                     <button class="flow-node" type="button" data-flow-step="2">
                         <span>03</span>
-                        <strong>evaluate</strong>
+                        <strong>match</strong>
                     </button>
                     <button class="flow-node" type="button" data-flow-step="3">
                         <span>04</span>
-                        <strong>notify</strong>
+                        <strong>evaluate</strong>
                     </button>
                     <button class="flow-node" type="button" data-flow-step="4">
                         <span>05</span>
+                        <strong>notify</strong>
+                    </button>
+                    <button class="flow-node" type="button" data-flow-step="5">
+                        <span>06</span>
                         <strong>remediate</strong>
                     </button>
                 </div>
@@ -220,8 +226,12 @@ guard: cooldown 10m + backoff</code></pre>
                         <span class="packet packet-two"></span>
                         <span class="packet packet-three"></span>
                         <div class="flow-column">
-                            <span>docker</span>
-                            <strong>log stream</strong>
+                            <span>source</span>
+                            <strong>docker logs</strong>
+                        </div>
+                        <div class="flow-column">
+                            <span>agent</span>
+                            <strong>forward logs</strong>
                         </div>
                         <div class="flow-column">
                             <span>template</span>
@@ -243,14 +253,14 @@ guard: cooldown 10m + backoff</code></pre>
 
                     <div class="flow-detail">
                         <div>
-                            <span class="mono-label" id="flow-step-label">// ingest.stream</span>
-                            <h3 id="flow-step-title">Docker log stream enters LogForge.</h3>
-                            <p id="flow-step-copy">Tail live logs from local Docker containers without shipping operational data to a third-party control plane.</p>
+                            <span class="mono-label" id="flow-step-label">// ingest.collect</span>
+                            <h3 id="flow-step-title">Docker logs enter LogForge.</h3>
+                            <p id="flow-step-copy">Tail local Docker containers out of the box, or accept forwarded logs from enrolled edge agents into a central LogForge host.</p>
                         </div>
                         <pre><code id="flow-step-code">source: docker://worker-02
 line: java.lang.OutOfMemoryError
 state: collected
-next: template.match</code></pre>
+next: agent.forward</code></pre>
                     </div>
                 </div>
             </div>
@@ -299,10 +309,11 @@ action: run ./scripts/reconnect-db.sh</code></pre>
                         <div>
                             <p class="mono-label">// platform.team</p>
                             <h3>Give developers a Docker-native incident console.</h3>
-                            <p>Standardize alert rules, keep history local, and make remediation visible without handing every workflow to a cloud APM.</p>
+                            <p>Run a central LogForge host that consumes forwarded logs from enrolled agents, standardizes alert rules, and keeps remediation visible without handing every workflow to a cloud APM.</p>
                         </div>
                         <pre><code>query: service=checkout severity=error rate &gt; 20/min
-result: error flood confirmed across 2 containers
+source: agents=edge-a, edge-b
+result: error flood confirmed across 2 hosts
 route: teams + pager webhook
 action: block repeated restarts for 10m</code></pre>
                     </article>
@@ -310,10 +321,11 @@ action: block repeated restarts for 10m</code></pre>
                     <article class="tab-panel" id="panel-msp" role="tabpanel" aria-labelledby="tab-msp" data-tab-panel="msp" hidden>
                         <div>
                             <p class="mono-label">// consultant.ops</p>
-                            <h3>Operate client Docker hosts without centralizing their logs.</h3>
-                            <p>Keep client data in place, enroll hosts intentionally, and use alert history as the handoff record.</p>
+                            <h3>Operate client Docker edges from one trusted host.</h3>
+                            <p>Enroll trusted agents per client or site, forward logs into central LogForge, and use alert history as the handoff record.</p>
                         </div>
                         <pre><code>query: client=edge-node disk_free &lt; 12%
+source: agent://client-a-edge-03
 result: low disk on docker volume
 route: pushover + webhook
 action: run guarded cleanup script</code></pre>
@@ -397,16 +409,65 @@ action: run guarded cleanup script</code></pre>
                         </tr>
                         <tr>
                             <th scope="row">CONTROL</th>
-                            <td><span class="mark yes">✓</span> dashboards and search</td>
-                            <td><span class="mark yes">✓</span> dashboard, alert history, route control, and action guardrails</td>
+                            <td><span class="mark yes">✓</span> single-host dashboards or separate agents</td>
+                            <td><span class="mark yes">✓</span> central LogForge host with enrolled edge agents across Docker hosts</td>
+                        </tr>
+                        <tr class="logforge-row">
+                            <th scope="row">PERFORMANCE</th>
+                            <td><span class="mark no">×</span> remote tailing, SSH polling, or noisy side channels</td>
+                            <td><span class="mark yes">✓</span> forwarded logs and events consumed by central LogForge</td>
                         </tr>
                         <tr class="logforge-row">
                             <th scope="row">PRIVACY</th>
                             <td><span class="mark no">×</span> cloud-first log shipping</td>
-                            <td><span class="mark yes">✓</span> self-hosted control plane with local operational data</td>
+                            <td><span class="mark yes">✓</span> self-hosted control plane for local and agent-forwarded operational data</td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </section>
+
+        <section class="section mesh-section" aria-labelledby="mesh-title">
+            <div class="mesh-layout">
+                <div class="mesh-copy">
+                    <p class="mono-label">// enterprise.mesh</p>
+                    <h2 id="mesh-title">One central host. Every Docker edge in view.</h2>
+                    <p>Businesses, platform teams, MSPs, and distributed operators can run LogForge on a central host, enroll trusted edge agents, and monitor multiple Docker machines without depending only on central-side tailing.</p>
+                    <p>Tailed local logs still work out of the box. The latest high-performance path is agent-forwarded logs and events into central LogForge.</p>
+                </div>
+
+                <aside class="mesh-console" aria-label="Central LogForge agent mesh">
+                    <div class="window-bar">
+                        <span class="window-dot"></span>
+                        <span class="window-dot"></span>
+                        <span class="window-dot"></span>
+                        <span class="window-title">logforge://enterprise-mesh</span>
+                        <span class="window-status">agents live</span>
+                    </div>
+                    <div class="mesh-body">
+                        <ol class="mesh-routes">
+                            <li>
+                                <span>edge-agent-01</span>
+                                <strong>logs/events -&gt;</strong>
+                                <em>central.logforge</em>
+                            </li>
+                            <li>
+                                <span>edge-agent-02</span>
+                                <strong>logs/events -&gt;</strong>
+                                <em>central.logforge</em>
+                            </li>
+                            <li>
+                                <span>edge-agent-03</span>
+                                <strong>logs/events -&gt;</strong>
+                                <em>central.logforge</em>
+                            </li>
+                        </ol>
+                        <div class="central-node">
+                            <span>central.logforge</span>
+                            <strong>rules + routes + history + guarded actions</strong>
+                        </div>
+                    </div>
+                </aside>
             </div>
         </section>
 
@@ -434,13 +495,56 @@ action: run guarded cleanup script</code></pre>
                     <p>Manage operators, alert rules, channels, and guarded actions from the local admin surface.</p>
                 </article>
                 <article>
-                    <span>V2 ROADMAP</span>
-                    <p>mTLS remote agent enrollment for explicitly trusted remote Docker nodes.</p>
+                    <span>CENTRAL + EDGE</span>
+                    <p>Run a central LogForge host and enroll trusted edge agents over mTLS for remote Docker nodes.</p>
                 </article>
                 <article>
-                    <span>V2 ROADMAP</span>
+                    <span>FORWARDED LOGS</span>
+                    <p>Use agents to forward logs and events into central LogForge for the latest high-performance path. Local tailing remains the simple out-of-the-box setup.</p>
+                </article>
+                <article>
+                    <span>ROADMAP</span>
                     <p>Appliance and hardened runtime options for tighter shared-host deployments.</p>
                 </article>
+            </div>
+        </section>
+
+        <section id="premium" class="section premium-section" aria-labelledby="premium-title">
+            <div class="premium-layout">
+                <div class="premium-copy">
+                    <p class="mono-label">// premium.waitlist</p>
+                    <h2 id="premium-title">Premium for central and edge operators.</h2>
+                    <p>Join the waitlist for advanced central host workflows, enterprise agent management, and support options for teams that monitor Docker across multiple machines.</p>
+                    <ul class="premium-points">
+                        <li>Central host visibility for enrolled Docker edges.</li>
+                        <li>Priority planning for platform teams, MSPs, and distributed operators.</li>
+                        <li>Premium rollout details sent as they become available.</li>
+                    </ul>
+                </div>
+
+                <form id="premium-form" class="premium-form" action="https://docs.google.com/forms/d/e/1FAIpQLSe7D8ET0jccLyB7ufdlz3Lj9IEhLvrrvncpP8xzFvLgqYZGEQ/formResponse" method="POST" target="_blank">
+                    <div class="code-header">
+                        <span>waitlist.form</span>
+                        <strong>premium</strong>
+                    </div>
+                    <div class="premium-form-body">
+                        <label for="premium-email">
+                            <span>Email</span>
+                            <input id="premium-email" name="entry.475791116" type="email" autocomplete="email" placeholder="ops@example.com" required />
+                        </label>
+                        <label for="premium-team-size">
+                            <span>Team size</span>
+                            <select id="premium-team-size" name="entry.1033853757">
+                                <option value="1 - 10 people">1 - 10 people</option>
+                                <option value="11 - 49 people">11 - 49 people</option>
+                                <option value="50 + people">50 + people</option>
+                            </select>
+                        </label>
+                        <button class="button button-primary premium-submit" type="submit">Join waitlist</button>
+                        <p id="premium-form-status" class="form-status" role="status" aria-live="polite"></p>
+                        <a class="form-fallback" href="https://docs.google.com/forms/d/e/1FAIpQLSe7D8ET0jccLyB7ufdlz3Lj9IEhLvrrvncpP8xzFvLgqYZGEQ/viewform" target="_blank" rel="noopener noreferrer">Open Google Form</a>
+                    </div>
+                </form>
             </div>
         </section>
 
@@ -448,8 +552,8 @@ action: run guarded cleanup script</code></pre>
             <div class="install-layout">
                 <div>
                     <p class="mono-label">// install.local</p>
-                    <h2 id="install-title">Install LogForge on your Docker host.</h2>
-                    <p>Clone the repository, start the Compose stack, and open the local dashboard. The first loop you build can watch logs, route alerts, and run guarded remediation without adding a cloud control plane.</p>
+                    <h2 id="install-title">Install LogForge on a local or central Docker host.</h2>
+                    <p>Clone the repository, start the Compose stack, and open the dashboard. Start with local Docker tailing out of the box, then enroll edge agents when you want remote hosts forwarding logs to the central deployment.</p>
                     <div class="install-stats" aria-label="Install summary">
                         <span>Docker Compose</span>
                         <span>localhost:8444</span>

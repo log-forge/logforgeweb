@@ -1,6 +1,7 @@
 (function () {
     const liveLogLines = [
         { source: "api-gateway", text: "GET /health 200 latency=18ms", hot: false },
+        { source: "edge-agent-01", text: "forwarded docker log frame host=edge-a", hot: false },
         { source: "worker-02", text: "java.lang.OutOfMemoryError: Java heap space", hot: true },
         { source: "logforge", text: "template matched: logs.oom_guard", hot: true },
         { source: "alert-engine", text: "threshold 3/60s reached for worker-02", hot: true },
@@ -12,10 +13,16 @@
 
     const flowSteps = [
         {
-            label: "// ingest.stream",
-            title: "Docker log stream enters LogForge.",
-            copy: "Tail live logs from local Docker containers without shipping operational data to a third-party control plane.",
-            code: "source: docker://worker-02\nline: java.lang.OutOfMemoryError\nstate: collected\nnext: template.match"
+            label: "// ingest.collect",
+            title: "Docker logs enter LogForge.",
+            copy: "Tail local Docker containers out of the box, or receive forwarded logs from enrolled edge agents into a central LogForge host.",
+            code: "source: docker://worker-02\npath: local tail or edge agent\nstate: collected\nnext: agent.forward"
+        },
+        {
+            label: "// agent.forward",
+            title: "Edge agent forwards logs to central.",
+            copy: "Trusted edge agents send logs and Docker events to central LogForge, avoiding slow remote tailing loops.",
+            code: "agent: edge-agent-01\ntarget: central.logforge\npayload: logs + docker events\nnext: template.match"
         },
         {
             label: "// template.match",
@@ -253,10 +260,59 @@
         });
     }
 
+    function setupPremiumWaitlist() {
+        const form = document.getElementById("premium-form");
+        const status = document.getElementById("premium-form-status");
+
+        if (!form || !window.fetch || !window.FormData) {
+            return;
+        }
+
+        const submit = form.querySelector("button[type='submit']");
+        const defaultSubmitText = submit ? submit.textContent : "";
+
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            if (submit) {
+                submit.disabled = true;
+                submit.textContent = "Sending...";
+            }
+
+            if (status) {
+                status.classList.remove("is-error");
+                status.textContent = "";
+            }
+
+            fetch(form.action, {
+                method: "POST",
+                mode: "no-cors",
+                body: new FormData(form)
+            }).then(function () {
+                form.reset();
+
+                if (status) {
+                    status.textContent = "You're on the waitlist. We'll be in touch.";
+                }
+            }).catch(function () {
+                if (status) {
+                    status.classList.add("is-error");
+                    status.textContent = "Could not submit. Open the Google Form link instead.";
+                }
+            }).finally(function () {
+                if (submit) {
+                    submit.disabled = false;
+                    submit.textContent = defaultSubmitText;
+                }
+            });
+        });
+    }
+
     window.addEventListener("DOMContentLoaded", function () {
         setupCopyButton();
         setupLiveLogs();
         setupFlow();
         setupTabs();
+        setupPremiumWaitlist();
     });
 }());
