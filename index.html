@@ -39,7 +39,7 @@
         <section class="hero" aria-labelledby="hero-title">
             <div class="hero-copy">
                 <p class="mono-label">// docker.control</p>
-                <h1 id="hero-title">Docker alerts that fix themselves.</h1>
+                <h1 id="hero-title">Docker alerts that fix themselves</h1>
                 <p class="hero-subhead">Self-hosted Docker dashboard for local and agent-forwarded logs, alert rules, notifications, file access, and safe remediation.</p>
                 <div class="action-row" aria-label="Primary actions">
                     <a class="button button-primary" href="#install">Install LogForge</a>
@@ -165,6 +165,7 @@ guard: cooldown 10m + backoff</code></pre>
                         <li>SSH into the host after users report errors.</li>
                         <li>Run <code>docker logs</code> and scan for the first useful stack trace.</li>
                         <li>Miss the alert window while checking the wrong container.</li>
+                        <li>Run <code>grep</code> to search for the keyword.</li>
                         <li>Manually restart and hope it was the right fix.</li>
                     </ul>
                 </article>
@@ -176,7 +177,7 @@ guard: cooldown 10m + backoff</code></pre>
                     </div>
                     <h3>Rule fires, route sends, guard fixes.</h3>
                     <ul>
-                        <li>Rule template catches <code>OutOfMemoryError</code> and restart loops.</li>
+                        <li>Alert rule catches <code>OutOfMemoryError</code> and restart loops.</li>
                         <li>Notifier sends to Slack, Discord, Telegram, Gotify, Teams, Pushover, SMS, email, or webhook.</li>
                         <li>Gatekeeper applies cooldown and backoff before restart, stop, kill, start, or script action.</li>
                         <li>Alert history records the event, action, and final outcome.</li>
@@ -189,33 +190,29 @@ guard: cooldown 10m + backoff</code></pre>
             <div class="section-intro">
                 <p class="mono-label">// live.pipeline</p>
                 <h2 id="flow-title">The operational loop, rendered live.</h2>
-                <p>Local Docker logs can be tailed directly, while enrolled edge agents forward remote host logs into central LogForge. From there rules match known failure patterns, the alert engine checks the timeline, notifiers route the signal, and the gatekeeper controls remediation.</p>
+                <p>Docker log tailing is the default collection path on each host or enrolled agent, and agents can forward logs and Docker events into central LogForge. From there, rules match logs, rates, metrics, missing signals, and Docker events; the alert engine checks the timeline, notifiers route the signal, and the gatekeeper controls remediation.</p>
             </div>
 
             <div class="flow-console">
                 <div class="flow-rail" aria-label="Flow stages">
                     <button class="flow-node is-active" type="button" data-flow-step="0">
                         <span>01</span>
-                        <strong>collect</strong>
+                        <strong>ingest</strong>
                     </button>
                     <button class="flow-node" type="button" data-flow-step="1">
                         <span>02</span>
-                        <strong>forward</strong>
+                        <strong>match</strong>
                     </button>
                     <button class="flow-node" type="button" data-flow-step="2">
                         <span>03</span>
-                        <strong>match</strong>
+                        <strong>evaluate</strong>
                     </button>
                     <button class="flow-node" type="button" data-flow-step="3">
                         <span>04</span>
-                        <strong>evaluate</strong>
+                        <strong>notify</strong>
                     </button>
                     <button class="flow-node" type="button" data-flow-step="4">
                         <span>05</span>
-                        <strong>notify</strong>
-                    </button>
-                    <button class="flow-node" type="button" data-flow-step="5">
-                        <span>06</span>
                         <strong>remediate</strong>
                     </button>
                 </div>
@@ -226,16 +223,12 @@ guard: cooldown 10m + backoff</code></pre>
                         <span class="packet packet-two"></span>
                         <span class="packet packet-three"></span>
                         <div class="flow-column">
-                            <span>source</span>
-                            <strong>docker logs</strong>
+                            <span>ingest</span>
+                            <strong>tail + forward</strong>
                         </div>
                         <div class="flow-column">
-                            <span>agent</span>
-                            <strong>forward logs</strong>
-                        </div>
-                        <div class="flow-column">
-                            <span>template</span>
-                            <strong>OOM / loop</strong>
+                            <span>rules</span>
+                            <strong>signals / custom</strong>
                         </div>
                         <div class="flow-column">
                             <span>engine</span>
@@ -253,14 +246,14 @@ guard: cooldown 10m + backoff</code></pre>
 
                     <div class="flow-detail">
                         <div>
-                            <span class="mono-label" id="flow-step-label">// ingest.collect</span>
-                            <h3 id="flow-step-title">Docker logs enter LogForge.</h3>
-                            <p id="flow-step-copy">Tail local Docker containers out of the box, or accept forwarded logs from enrolled edge agents into a central LogForge host.</p>
+                            <span class="mono-label" id="flow-step-label">// ingest.paths</span>
+                            <h3 id="flow-step-title">Docker logs enter from hosts and agents.</h3>
+                            <p id="flow-step-copy">Tail Docker logs by default on each host or enrolled agent, then forward logs and Docker events from agents into a central LogForge host.</p>
                         </div>
-                        <pre><code id="flow-step-code">source: docker://worker-02
-line: java.lang.OutOfMemoryError
-state: collected
-next: agent.forward</code></pre>
+                        <pre><code id="flow-step-code">host: docker://worker-02 tail
+agent: edge-agent-01 tail + forward
+state: ingested
+next: rules.match</code></pre>
                     </div>
                 </div>
             </div>
@@ -297,7 +290,7 @@ action: restart after cooldown</code></pre>
                         <div>
                             <p class="mono-label">// solo.dev</p>
                             <h3>Keep local services honest while you ship.</h3>
-                            <p>Use rule templates to flag logs that normally vanish in a terminal tab you closed an hour ago.</p>
+                            <p>Use templates or custom rules for logs, rates, metrics, and container events that normally vanish in a terminal tab you closed an hour ago.</p>
                         </div>
                         <pre><code>query: logs contains "database connection refused"
 result: api cannot reach postgres
@@ -338,7 +331,7 @@ action: run guarded cleanup script</code></pre>
             <div class="section-intro">
                 <p class="mono-label">// rule.templates</p>
                 <h2 id="templates-title">Templates for the failures Docker operators already know.</h2>
-                <p>Start from known failure modes, tune thresholds per container, and keep the rule language close to the runtime symptoms.</p>
+                <p>Start from known failure modes, tune thresholds per container, then write custom rules across logs, event rates, missing signals, metrics, and Docker events.</p>
             </div>
 
             <div class="template-grid">
@@ -395,7 +388,7 @@ action: run guarded cleanup script</code></pre>
                         <tr class="logforge-row">
                             <th scope="row">ALERTING</th>
                             <td><span class="mark no">×</span> manual search or external setup</td>
-                            <td><span class="mark yes">✓</span> rule templates for OOM, restart loops, floods, and thresholds</td>
+                            <td><span class="mark yes">✓</span> templates plus custom rules for logs, rates, absence, metrics, and Docker events</td>
                         </tr>
                         <tr class="logforge-row">
                             <th scope="row">ALERTING</th>
@@ -432,8 +425,8 @@ action: run guarded cleanup script</code></pre>
                 <div class="mesh-copy">
                     <p class="mono-label">// enterprise.mesh</p>
                     <h2 id="mesh-title">One central host. Every Docker edge in view.</h2>
-                    <p>Businesses, platform teams, MSPs, and distributed operators can run LogForge on a central host, enroll trusted edge agents, and monitor multiple Docker machines without depending only on central-side tailing.</p>
-                    <p>Tailed local logs still work out of the box. The latest high-performance path is agent-forwarded logs and events into central LogForge.</p>
+                    <p>Businesses, platform teams, MSPs, and distributed operators can run LogForge on a central host, enroll trusted edge agents, and monitor multiple Docker machines without making the central host poll every remote Docker node.</p>
+                    <p>Docker log tailing still works out of the box on each host or agent. The latest high-performance path is agent-forwarded logs and events into central LogForge.</p>
                 </div>
 
                 <aside class="mesh-console" aria-label="Central LogForge agent mesh">
@@ -458,6 +451,11 @@ action: run guarded cleanup script</code></pre>
                             </li>
                             <li>
                                 <span>edge-agent-03</span>
+                                <strong>logs/events -&gt;</strong>
+                                <em>central.logforge</em>
+                            </li>
+                            <li>
+                                <span>edge-agent-04</span>
                                 <strong>logs/events -&gt;</strong>
                                 <em>central.logforge</em>
                             </li>
@@ -500,7 +498,7 @@ action: run guarded cleanup script</code></pre>
                 </article>
                 <article>
                     <span>FORWARDED LOGS</span>
-                    <p>Use agents to forward logs and events into central LogForge for the latest high-performance path. Local tailing remains the simple out-of-the-box setup.</p>
+                    <p>Use agents to forward logs and events into central LogForge for the latest high-performance path. Docker log tailing remains the simple out-of-the-box setup on each host or agent.</p>
                 </article>
             </div>
         </section>
@@ -549,7 +547,7 @@ action: run guarded cleanup script</code></pre>
                 <div>
                     <p class="mono-label">// install.local</p>
                     <h2 id="install-title">Install LogForge on a local or central Docker host.</h2>
-                    <p>Clone the repository, start the Compose stack, and open the dashboard. Start with local Docker tailing out of the box, then enroll edge agents when you want remote hosts forwarding logs to the central deployment.</p>
+                    <p>Clone the repository, start the Compose stack, and open the dashboard. Start with Docker log tailing out of the box on a single host or enrolled agent, then forward remote host logs to the central deployment.</p>
                     <div class="install-stats" aria-label="Install summary">
                         <span>Docker Compose</span>
                         <span>localhost:8444</span>
