@@ -14,10 +14,8 @@
     const FLOW_ADVANCE_MS = 5500;
     const FLOW_TRANSITION_MS = 180;
     const MOBILE_LOG_ROW_LIMIT = 7;
-    const DESKTOP_LOG_ROW_LIMIT = 12;
+    const MAX_DESKTOP_LOG_ROWS = 24;
     const DESKTOP_LOG_MIN_WIDTH = 821;
-    const LOG_TOP_GAP_LIMIT = 16;
-    const LOG_GROWTH_TOLERANCE = 1;
 
     const flowSteps = [
         {
@@ -132,7 +130,6 @@
             return;
         }
 
-        const panel = stream.closest(".log-panel") || stream.parentElement;
         let cursor = 0;
         let entries = [];
         let rowTarget = MOBILE_LOG_ROW_LIMIT;
@@ -177,7 +174,7 @@
         }
 
         function pruneEntries() {
-            while (entries.length > DESKTOP_LOG_ROW_LIMIT) {
+            while (entries.length > MAX_DESKTOP_LOG_ROWS) {
                 entries.shift();
             }
         }
@@ -193,28 +190,27 @@
             stream.replaceChildren(fragment);
         }
 
-        function measureStream() {
+        function getStreamMetrics() {
             const streamRect = stream.getBoundingClientRect();
-            const panelRect = panel ? panel.getBoundingClientRect() : streamRect;
-            const firstItem = stream.firstElementChild;
-            let topGap = Number.POSITIVE_INFINITY;
-
-            if (firstItem) {
-                const styles = window.getComputedStyle(stream);
-                const paddingTop = parseFloat(styles.paddingTop) || 0;
-                topGap = firstItem.getBoundingClientRect().top - streamRect.top - paddingTop;
-            }
+            const styles = window.getComputedStyle(stream);
+            const paddingTop = parseFloat(styles.paddingTop) || 0;
+            const paddingBottom = parseFloat(styles.paddingBottom) || 0;
+            const rowGap = parseFloat(styles.rowGap);
+            const fallbackGap = parseFloat(styles.gap) || 0;
 
             return {
-                panelHeight: panelRect.height,
-                streamHeight: streamRect.height,
-                topGap
+                availableHeight: Math.max(0, streamRect.height - paddingTop - paddingBottom),
+                rowGap: Number.isFinite(rowGap) ? rowGap : fallbackGap
             };
         }
 
-        function hasGrown(candidate, baseline) {
-            return candidate.panelHeight > baseline.panelHeight + LOG_GROWTH_TOLERANCE ||
-                candidate.streamHeight > baseline.streamHeight + LOG_GROWTH_TOLERANCE;
+        function getRenderedRowsHeight(rowGap) {
+            const rows = Array.from(stream.children);
+            const rowHeights = rows.reduce(function (height, row) {
+                return height + row.getBoundingClientRect().height;
+            }, 0);
+
+            return rowHeights + (rowGap * Math.max(0, rows.length - 1));
         }
 
         function recomputeRowTarget() {
@@ -224,28 +220,18 @@
                 return;
             }
 
-            ensureEntries(DESKTOP_LOG_ROW_LIMIT);
+            ensureEntries(MAX_DESKTOP_LOG_ROWS);
 
             let bestCount = MOBILE_LOG_ROW_LIMIT;
-            renderRows(bestCount);
+            const metrics = getStreamMetrics();
 
-            const baseline = measureStream();
+            for (let count = MOBILE_LOG_ROW_LIMIT; count <= MAX_DESKTOP_LOG_ROWS; count += 1) {
+                renderRows(count);
 
-            if (baseline.topGap > LOG_TOP_GAP_LIMIT) {
-                for (let count = MOBILE_LOG_ROW_LIMIT + 1; count <= DESKTOP_LOG_ROW_LIMIT; count += 1) {
-                    renderRows(count);
-
-                    const measurement = measureStream();
-
-                    if (hasGrown(measurement, baseline)) {
-                        break;
-                    }
-
+                if (getRenderedRowsHeight(metrics.rowGap) <= metrics.availableHeight) {
                     bestCount = count;
-
-                    if (measurement.topGap <= LOG_TOP_GAP_LIMIT) {
-                        break;
-                    }
+                } else {
+                    break;
                 }
             }
 
