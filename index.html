@@ -724,7 +724,7 @@ action: run guarded cleanup script</code></pre>
                 <div>
                     <p class="mono-label">// install.local</p>
                     <h2 id="install-title">Install LogForge on a local or central Docker host.</h2>
-                    <p>Clone the repository, start the Compose stack, and open the dashboard. Start with Docker log tailing out of the box on a single host or enrolled agent, then forward remote host logs to the central deployment.</p>
+                    <p>Run the installer to clone or update LogForge, start the Compose stack, and open the dashboard. Start with Docker log tailing out of the box on a single host or enrolled agent, then forward remote host logs to the central deployment.</p>
                     <div class="install-stats" aria-label="Install summary">
                         <span>Docker Compose</span>
                         <span>localhost:8444</span>
@@ -732,15 +732,21 @@ action: run guarded cleanup script</code></pre>
                     </div>
                 </div>
 
-                <div class="install-card">
-                    <div class="code-header">
+                <div class="install-card" data-tabs>
+                    <div class="code-header install-code-header">
                         <span>terminal</span>
-                        <button id="copy-install" class="copy-button" type="button" data-copy-target="install-snippet">
+                        <div class="install-method-toggle" role="tablist" aria-label="Install method">
+                            <button class="install-method-tab is-active" id="install-tab-script" type="button" role="tab" aria-selected="true" aria-controls="install-panel-script" data-tab="script">Script</button>
+                            <button class="install-method-tab" id="install-tab-docker" type="button" role="tab" aria-selected="false" aria-controls="install-panel-docker" data-tab="docker" tabindex="-1">Docker</button>
+                        </div>
+                        <button id="copy-install" class="copy-button" type="button" data-copy-target="install-script-snippet">
                             <span class="copy-default">Copy</span>
                             <span class="copy-success">Copied</span>
                         </button>
                     </div>
-                    <pre><code id="install-snippet">git clone https://github.com/log-forge/logforge.git
+                    <div class="install-code-panels">
+                        <pre class="install-code-panel is-active" id="install-panel-script" role="tabpanel" aria-labelledby="install-tab-script" data-tab-panel="script"><code id="install-script-snippet">curl -fsSL https://www.logforge.dev/install.sh | sh</code></pre>
+                        <pre class="install-code-panel" id="install-panel-docker" role="tabpanel" aria-labelledby="install-tab-docker" data-tab-panel="docker" hidden><code id="install-docker-snippet">git clone https://github.com/log-forge/logforge.git
 cd logforge
 docker compose pull
 docker compose up -d
@@ -748,6 +754,7 @@ docker compose ps
 
 # Open LogForge
 https://localhost:8444</code></pre>
+                    </div>
                 </div>
             </div>
         </section>
