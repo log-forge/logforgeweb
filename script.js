@@ -81,35 +81,49 @@
         });
     }
 
-    function setupCopyButton() {
-        const button = document.getElementById("copy-install");
+    function getCopyButtonText(button) {
+        const installTabs = button.closest(".install-card[data-tabs]");
+        const activeCode = installTabs ? installTabs.querySelector("[data-tab-panel].is-active code") : null;
 
-        if (!button) {
+        if (activeCode) {
+            return activeCode.textContent.trim();
+        }
+
+        const targetId = button.getAttribute("data-copy-target");
+        const target = targetId ? document.getElementById(targetId) : null;
+
+        return target ? target.textContent.trim() : "";
+    }
+
+    function setupCopyButton() {
+        const buttons = Array.from(document.querySelectorAll(".copy-button"));
+
+        if (!buttons.length) {
             return;
         }
 
-        button.addEventListener("click", function () {
-            const targetId = button.getAttribute("data-copy-target");
-            const target = targetId ? document.getElementById(targetId) : null;
-            const text = target ? target.textContent.trim() : "";
+        buttons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                const text = getCopyButtonText(button);
 
-            if (!text) {
-                return;
-            }
-
-            copyText(text).then(function () {
-                button.classList.add("is-copied");
-                window.setTimeout(function () {
-                    button.classList.remove("is-copied");
-                }, 1800);
-            }).catch(function () {
-                const defaultLabel = button.querySelector(".copy-default");
-                if (defaultLabel) {
-                    defaultLabel.textContent = "Failed";
-                    window.setTimeout(function () {
-                        defaultLabel.textContent = "Copy";
-                    }, 1800);
+                if (!text) {
+                    return;
                 }
+
+                copyText(text).then(function () {
+                    button.classList.add("is-copied");
+                    window.setTimeout(function () {
+                        button.classList.remove("is-copied");
+                    }, 1800);
+                }).catch(function () {
+                    const defaultLabel = button.querySelector(".copy-default");
+                    if (defaultLabel) {
+                        defaultLabel.textContent = "Failed";
+                        window.setTimeout(function () {
+                            defaultLabel.textContent = "Copy";
+                        }, 1800);
+                    }
+                });
             });
         });
     }
@@ -385,6 +399,10 @@
                     const isActive = panel.dataset.tabPanel === tabName;
                     panel.classList.toggle("is-active", isActive);
                     panel.hidden = !isActive;
+                });
+
+                root.querySelectorAll(".copy-button.is-copied").forEach(function (button) {
+                    button.classList.remove("is-copied");
                 });
             }
 

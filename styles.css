@@ -2189,6 +2189,67 @@ code {
     background: rgba(0, 0, 0, 0.35);
 }
 
+.install-code-header {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.55rem;
+}
+
+.install-code-header > span {
+    flex: 1 1 auto;
+    min-width: 7rem;
+}
+
+.install-method-toggle {
+    display: inline-grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.18rem;
+    flex: 0 1 188px;
+    padding: 0.18rem;
+    border: 1px solid rgba(94, 183, 232, 0.24);
+    border-radius: 6px;
+    background: rgba(94, 183, 232, 0.055);
+}
+
+.install-method-tab {
+    min-width: 0;
+    min-height: 34px;
+    padding: 0 0.62rem;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--muted);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.install-method-tab:hover,
+.install-method-tab:focus-visible {
+    border-color: rgba(94, 183, 232, 0.35);
+    background: rgba(94, 183, 232, 0.09);
+    color: var(--brand-blue);
+}
+
+.install-method-tab.is-active {
+    border-color: rgba(94, 183, 232, 0.35);
+    background: rgba(94, 183, 232, 0.09);
+    color: var(--brand-blue);
+}
+
+.install-method-tab.is-active:hover,
+.install-method-tab.is-active:focus-visible {
+    border-color: rgba(94, 183, 232, 0.56);
+    background: rgba(94, 183, 232, 0.14);
+    color: #d8edf9;
+}
+
+.install-code-panels pre {
+    min-height: 12.2rem;
+}
+
 .code-header {
     justify-content: space-between;
     color: var(--muted);
@@ -2209,12 +2270,14 @@ code {
     font-size: 0.76rem;
     font-weight: 700;
     cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
 }
 
 .copy-button:hover,
 .copy-button:focus-visible {
     border-color: rgba(94, 183, 232, 0.56);
     background: rgba(94, 183, 232, 0.14);
+    color: #d8edf9;
 }
 
 .copy-success {
@@ -2523,6 +2586,20 @@ code {
 
     .tab-panel {
         grid-template-columns: 1fr;
+    }
+
+    .install-code-header {
+        padding: 0.55rem;
+    }
+
+    .install-method-toggle {
+        order: 3;
+        flex-basis: 100%;
+        width: 100%;
+    }
+
+    .install-code-header .copy-button {
+        order: 2;
     }
 
     .template-grid article,
