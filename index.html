@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="google-site-verification" content="5gdbox0Q_wbktke-19hYoCBIcnkvSwL-Vssron53sCU" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="LogForge is a self-hosted Docker dashboard for real-time logs, alert rules, notifications, file access, and safe remediation." />
+    <meta name="description" content="LogForge is a self-hosted Docker dashboard for real-time logs, alert rules, notifications, file access, safe remediation, and an AI agent for Docker operations tasks." />
     <title>LogForge - Docker Alerts That Fix Themselves</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -40,7 +40,7 @@
             <div class="hero-copy">
                 <p class="mono-label">// docker.control</p>
                 <h1 id="hero-title">Docker alerts that fix themselves</h1>
-                <p class="hero-subhead">Self-hosted Docker dashboard for local and agent-forwarded logs, alert rules, notifications, file access, and safe remediation.</p>
+                <p class="hero-subhead">Self-hosted Docker dashboard for local and agent-forwarded logs, alert rules, notifications, file access, safe remediation, and AI agent tasks for Docker operations.</p>
                 <div class="action-row" aria-label="Primary actions">
                     <a class="button button-primary" href="#install">Install LogForge</a>
                     <a class="button button-secondary" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">View GitHub</a>
@@ -54,6 +54,7 @@
                     <span>alert rules</span>
                     <span>notifiers</span>
                     <span>guarded fixes</span>
+                    <span>AI agent</span>
                     <span>edge agents</span>
                 </div>
             </div>
@@ -180,6 +181,7 @@ guard: cooldown 10m + backoff</code></pre>
                         <li>Alert rule catches <code>OutOfMemoryError</code> and restart loops.</li>
                         <li>Notifier sends to Slack, Discord, Telegram, Gotify, Teams, Pushover, SMS, email, or webhook.</li>
                         <li>Gatekeeper applies cooldown and backoff before restart, stop, kill, start, or script action.</li>
+                        <li>AI Agent explains likely cause and suggests scoped fixes before repeated incidents spread.</li>
                         <li>Alert history records the event, action, and final outcome.</li>
                     </ul>
                 </article>
@@ -327,6 +329,159 @@ action: run guarded cleanup script</code></pre>
             </div>
         </section>
 
+        <section id="ai-remediation" class="section ai-section" aria-labelledby="ai-agent-title">
+            <div class="section-intro">
+                <p class="mono-label">// ai.agent.chat</p>
+                <h2 id="ai-agent-title">LogForge AI Agent performs Docker operations tasks.</h2>
+                <p>Operators chat with the agent for reports, explanations, incident investigation, and guarded remediation plans. Connect local models through Ollama while LogForge maintains a living operations graph behind the scenes across logs, Docker events, containers, incidents, deploy history, ownership, code, and docs. The private graph keeps context current, remembers relationships, and gives the model source-linked evidence instead of raw operational noise.</p>
+            </div>
+
+            <div class="ai-agent-theater" aria-label="LogForge AI Agent animated chat demo">
+                <div class="window-bar">
+                    <span class="window-dot"></span>
+                    <span class="window-dot"></span>
+                    <span class="window-dot"></span>
+                    <span class="window-title">logforge://ai-agent/report</span>
+                    <span class="window-status">traversing</span>
+                </div>
+
+                <div class="ai-theater-body">
+                    <div class="thinking-graph" aria-hidden="true">
+                        <span class="graph-line line-one"></span>
+                        <span class="graph-line line-two"></span>
+                        <span class="graph-line line-three"></span>
+                        <span class="graph-line line-four"></span>
+                        <span class="graph-line line-five"></span>
+                        <span class="graph-line line-six"></span>
+                        <span class="graph-line line-seven"></span>
+                        <span class="graph-node graph-logs">logs</span>
+                        <span class="graph-node graph-events">events</span>
+                        <span class="graph-node graph-containers">containers</span>
+                        <span class="graph-node graph-deploys">deploys</span>
+                        <span class="graph-node graph-code">code</span>
+                        <span class="graph-node graph-incidents">incidents</span>
+                        <span class="graph-node graph-owners">owners</span>
+                        <span class="graph-node graph-ollama">ollama</span>
+                    </div>
+
+                    <div class="agent-chat-demo">
+                        <div class="chat-transcript" aria-label="Agent chat transcript">
+                            <article class="chat-message operator-message">
+                                <span class="chat-role">operator</span>
+                                <p>For all frontend services on the production machine in the last 6 months, provide an error report, compare it with the previous 6 months, and add the delta.</p>
+                            </article>
+
+                            <article class="chat-message agent-thinking">
+                                <span class="chat-role">LogForge AI Agent</span>
+                                <p>
+                                    Traversing live operations graph
+                                    <span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                                </p>
+                                <ul class="agent-trace" aria-label="Context being retrieved">
+                                    <li>logs</li>
+                                    <li>Docker events</li>
+                                    <li>deploy windows</li>
+                                    <li>incidents</li>
+                                    <li>owners</li>
+                                    <li>code/docs</li>
+                                </ul>
+                            </article>
+
+                            <section class="agent-report" aria-label="AI agent output summary">
+                                <div class="agent-report-header">
+                                    <div>
+                                        <span class="report-kicker">// output.summary</span>
+                                        <h3>Frontend error report</h3>
+                                        <p>Production frontend services, last 6 months compared with the previous 6 months.</p>
+                                    </div>
+                                    <strong>ready</strong>
+                                </div>
+
+                                <div class="report-service-list" aria-label="Service-level error deltas">
+                                    <article>
+                                        <div>
+                                            <strong>web-ui</strong>
+                                            <span>3,482 vs 2,471 errors</span>
+                                        </div>
+                                        <em class="delta-up">+41%</em>
+                                    </article>
+                                    <article>
+                                        <div>
+                                            <strong>checkout-frontend</strong>
+                                            <span>1,214 vs 754 errors</span>
+                                        </div>
+                                        <em class="delta-up">+61%</em>
+                                    </article>
+                                    <article>
+                                        <div>
+                                            <strong>admin-console</strong>
+                                            <span>386 vs 472 errors</span>
+                                        </div>
+                                        <em class="delta-down">-18%</em>
+                                    </article>
+                                </div>
+
+                                <div class="report-findings">
+                                    <article>
+                                        <span>likely contributors</span>
+                                        <p>Most of the increase clusters around the February 14, 2026 auth-cache deploy and incident LF-2407, then tails off after the March 3, 2026 retry rule change.</p>
+                                    </article>
+                                    <article>
+                                        <span>recommended next steps</span>
+                                        <p>Review <code>src/routes/session.ts</code>, raise the checkout timeout alert threshold, and queue a guarded nginx reload playbook for operator approval.</p>
+                                    </article>
+                                </div>
+
+                                <div class="source-pills" aria-label="Source-linked evidence">
+                                    <span>log:error-family/auth-timeout</span>
+                                    <span>deploy:web-ui@2026.02.14</span>
+                                    <span>incident:LF-2407</span>
+                                    <span>owner:frontend-platform</span>
+                                </div>
+                            </section>
+                        </div>
+
+                        <aside class="agent-context-rail" aria-label="Behind-the-scenes graph context benefits">
+                            <article>
+                                <span>complete operational recall</span>
+                                <p>Past alerts, incidents, owners, deploys, and related services stay connected to the next question.</p>
+                            </article>
+                            <article>
+                                <span>relationship-aware investigation</span>
+                                <p>The agent traverses from a log family to containers, Docker events, code paths, docs, and deploy windows.</p>
+                            </article>
+                            <article>
+                                <span>incremental live context</span>
+                                <p>New logs and events update the graph without making the operator rebuild context by hand.</p>
+                            </article>
+                            <article>
+                                <span>local model connectivity with Ollama</span>
+                                <p>Keep operational context private to your LogForge deployment while routing agent tasks to local models.</p>
+                            </article>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+
+            <div class="agent-task-chips" aria-label="LogForge AI Agent task examples">
+                <article>
+                    <span>report.task</span>
+                    <strong>error delta</strong>
+                    <p>Compare long-window error trends across production services and return the delta with linked evidence.</p>
+                </article>
+                <article>
+                    <span>explain.task</span>
+                    <strong>container context</strong>
+                    <p>Explain what a container does from metadata, logs, docs, code, deployment history, incidents, and ownership.</p>
+                </article>
+                <article>
+                    <span>remediate.task</span>
+                    <strong>guarded action</strong>
+                    <p>Draft commands or rule edits, then wait for operator approval anywhere LogForge policy requires it.</p>
+                </article>
+            </div>
+        </section>
+
         <section id="templates" class="section templates-section" aria-labelledby="templates-title">
             <div class="section-intro">
                 <p class="mono-label">// rule.templates</p>
@@ -399,6 +554,11 @@ action: run guarded cleanup script</code></pre>
                             <th scope="row">REMEDIATION</th>
                             <td><span class="mark no">×</span> stops at awareness</td>
                             <td><span class="mark yes">✓</span> restart, stop, kill, start, or script action with cooldown and backoff</td>
+                        </tr>
+                        <tr class="logforge-row">
+                            <th scope="row">AI AGENT</th>
+                            <td><span class="mark no">×</span> isolated errors with no historical context</td>
+                            <td><span class="mark yes">✓</span> graph-grounded reports, container explanations, and guarded remediation plans</td>
                         </tr>
                         <tr>
                             <th scope="row">CONTROL</th>
