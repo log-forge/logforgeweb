@@ -3,6 +3,7 @@ set -eu
 
 REPO_URL="https://github.com/log-forge/logforge.git"
 TARGET_DIR="logforge"
+EXPECTED_UNICRON_IMAGE="logforge/unicron:latest"
 DEFAULT_UNICRON_APP_PORT="8444"
 DEFAULT_UNICRON_AGENT_MTLS_PORT="9443"
 UNICRON_APP_PORT_SELECTED="$DEFAULT_UNICRON_APP_PORT"
@@ -44,30 +45,65 @@ check_docker() {
     fi
 }
 
-pull_compose_images() {
-    printf 'Resolving Docker Compose images...\n'
-    if ! images="$(docker compose config --images)"; then
-        printf 'Error: Docker Compose could not resolve images to pull.\n' >&2
-        rerun_after_failure
+central_compose() {
+    docker compose -f docker-compose.yml "$@"
+}
+
+verify_existing_checkout() {
+    if [ ! -d "$TARGET_DIR/.git" ]; then
+        printf 'Error: ./%s already exists but is not a Git repository.\n' "$TARGET_DIR" >&2
+        printf 'Move it aside or run this installer from another directory.\n' >&2
         exit 1
     fi
 
-    if [ -z "$images" ]; then
-        printf 'Error: Docker Compose did not report any images to pull.\n' >&2
-        rerun_after_failure
-        exit 1
-    fi
-
-    printf 'The first pull may download roughly 700 MB.\n'
-    printf '%s\n' "$images" | while IFS= read -r image; do
-        if [ -n "$image" ]; then
-            printf 'Pulling image %s...\n' "$image"
-            if ! docker pull "$image"; then
-                rerun_after_failure
-                exit 1
-            fi
+    origin_url="$(git -C "$TARGET_DIR" remote get-url origin 2>/dev/null || true)"
+    if [ "$origin_url" != "$REPO_URL" ]; then
+        if [ -n "$origin_url" ]; then
+            printf 'Error: ./%s already exists but its origin is %s.\n' "$TARGET_DIR" "$origin_url" >&2
+        else
+            printf 'Error: ./%s already exists but it does not have an origin remote.\n' "$TARGET_DIR" >&2
         fi
-    done
+        printf 'Expected origin: %s\n' "$REPO_URL" >&2
+        printf 'Move it aside or run this installer from another directory.\n' >&2
+        exit 1
+    fi
+}
+
+validate_central_compose_image() {
+    printf 'Validating Docker Compose image...\n'
+
+    if [ ! -f docker-compose.yml ]; then
+        printf 'Error: ./%s/docker-compose.yml was not found.\n' "$TARGET_DIR" >&2
+        rerun_after_failure
+        exit 1
+    fi
+
+    if ! images="$(central_compose config --images)"; then
+        printf 'Error: Docker Compose could not resolve images from docker-compose.yml.\n' >&2
+        rerun_after_failure
+        exit 1
+    fi
+
+    images="$(printf '%s\n' "$images" | awk 'NF { print }')"
+    if [ "$images" != "$EXPECTED_UNICRON_IMAGE" ]; then
+        printf 'Error: docker-compose.yml must resolve to exactly %s, but found:\n' "$EXPECTED_UNICRON_IMAGE" >&2
+        if [ -n "$images" ]; then
+            printf '%s\n' "$images" >&2
+        else
+            printf '(no images)\n' >&2
+        fi
+        rerun_after_failure
+        exit 1
+    fi
+}
+
+pull_unicron_image() {
+    printf 'The first pull may download roughly 700 MB.\n'
+    printf 'Pulling image %s...\n' "$EXPECTED_UNICRON_IMAGE"
+    if ! docker pull "$EXPECTED_UNICRON_IMAGE"; then
+        rerun_after_failure
+        exit 1
+    fi
 }
 
 get_env_file_value() {
@@ -250,7 +286,7 @@ resolve_configured_ports() {
 }
 
 existing_compose_containers() {
-    containers="$(docker compose ps -a -q 2>/dev/null || true)"
+    containers="$(central_compose ps -a -q unicron 2>/dev/null || true)"
     [ -n "$containers" ]
 }
 
@@ -274,12 +310,13 @@ configure_ports() {
 
     printf 'Checking host ports...\n'
 
+    UNICRON_APP_PORT_SELECTED="$app_port"
+    UNICRON_AGENT_MTLS_PORT_SELECTED="$agent_mtls_port"
+    export UNICRON_APP_PORT="$UNICRON_APP_PORT_SELECTED"
+    export UNICRON_AGENT_MTLS_PORT="$UNICRON_AGENT_MTLS_PORT_SELECTED"
+
     if existing_compose_containers; then
         printf 'Existing LogForge Compose containers detected; keeping configured ports.\n'
-        UNICRON_APP_PORT_SELECTED="$app_port"
-        UNICRON_AGENT_MTLS_PORT_SELECTED="$agent_mtls_port"
-        export UNICRON_APP_PORT="$UNICRON_APP_PORT_SELECTED"
-        export UNICRON_AGENT_MTLS_PORT="$UNICRON_AGENT_MTLS_PORT_SELECTED"
         return 0
     fi
 
@@ -345,15 +382,14 @@ configure_ports() {
 }
 
 require_command git
+
+if [ -e "$TARGET_DIR" ]; then
+    verify_existing_checkout
+fi
+
 check_docker
 
 if [ -e "$TARGET_DIR" ]; then
-    if [ ! -d "$TARGET_DIR/.git" ]; then
-        printf 'Error: ./%s already exists but is not a Git repository.\n' "$TARGET_DIR" >&2
-        printf 'Move it aside or run this installer from another directory.\n' >&2
-        exit 1
-    fi
-
     printf 'Updating ./%s...\n' "$TARGET_DIR"
     if ! git -C "$TARGET_DIR" pull --ff-only; then
         rerun_after_failure
@@ -370,17 +406,17 @@ fi
 cd "$TARGET_DIR"
 
 configure_ports
-
-pull_compose_images
+validate_central_compose_image
+pull_unicron_image
 
 printf 'Starting LogForge containers...\n'
-if ! docker compose up -d; then
+if ! central_compose up -d unicron; then
     rerun_after_failure
     exit 1
 fi
 
 printf 'LogForge containers:\n'
-if ! docker compose ps; then
+if ! central_compose ps unicron; then
     rerun_after_failure
     exit 1
 fi
