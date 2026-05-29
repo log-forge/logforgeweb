@@ -421,4 +421,4 @@ if ! central_compose ps unicron; then
     exit 1
 fi
 
-printf '\nLogForge is ready at https://localhost:%s\n' "$UNICRON_APP_PORT_SELECTED"
+printf '\nLogForge is ready at https://localhost:%s/unicron\n' "$UNICRON_APP_PORT_SELECTED"
