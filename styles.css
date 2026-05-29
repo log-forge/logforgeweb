@@ -1610,8 +1610,10 @@ code {
 
 .agent-context-rail {
     display: grid;
+    grid-template-rows: repeat(4, auto) minmax(15rem, 1fr);
     gap: 0.75rem;
-    align-content: start;
+    align-content: stretch;
+    height: 100%;
     min-width: 0;
 }
 
@@ -1622,6 +1624,61 @@ code {
         rgba(4, 10, 16, 0.76);
 }
 
+.agent-context-rail .agent-follow-up-prompt {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    min-width: 0;
+    min-height: 15rem;
+    padding: 1rem;
+    border-color: rgba(94, 183, 232, 0.52);
+    background:
+        linear-gradient(135deg, rgba(94, 183, 232, 0.13), transparent 54%),
+        linear-gradient(180deg, rgba(243, 97, 20, 0.08), transparent),
+        rgba(4, 10, 16, 0.9);
+    box-shadow:
+        0 0 34px rgba(94, 183, 232, 0.15),
+        inset 0 0 0 1px rgba(243, 97, 20, 0.12);
+}
+
+.follow-up-agent-row {
+    display: flex;
+    align-items: center;
+    gap: 0.68rem;
+    min-width: 0;
+}
+
+.agent-context-rail .follow-up-avatar {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 2.28rem;
+    height: 2.28rem;
+    border: 1px solid rgba(255, 177, 109, 0.42);
+    border-radius: 8px;
+    background:
+        linear-gradient(135deg, rgba(255, 177, 109, 0.22), rgba(94, 183, 232, 0.12)),
+        rgba(4, 10, 16, 0.88);
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    box-shadow: 0 0 22px rgba(255, 177, 109, 0.18);
+}
+
+.follow-up-agent-meta {
+    display: grid;
+    gap: 0.18rem;
+    min-width: 0;
+}
+
+.follow-up-agent-meta strong {
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
 .agent-context-rail span {
     display: block;
     color: var(--brand-blue);
@@ -1630,11 +1687,88 @@ code {
     text-transform: lowercase;
 }
 
+.agent-context-rail .follow-up-agent-meta span {
+    color: var(--brand-orange-light);
+}
+
 .agent-context-rail p {
     margin: 0.58rem 0 0;
     color: #c8d6e0;
     font-size: 0.88rem;
     line-height: 1.58;
+}
+
+.follow-up-bubble {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    align-self: flex-start;
+    min-width: 0;
+    width: fit-content;
+    max-width: 100%;
+    padding: 1rem;
+    border: 1px solid rgba(194, 226, 246, 0.18);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent),
+        rgba(8, 17, 26, 0.86);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 16px 34px rgba(0, 0, 0, 0.16);
+}
+
+.follow-up-bubble::before {
+    content: "";
+    position: absolute;
+    top: -0.36rem;
+    left: 1rem;
+    width: 0.64rem;
+    height: 0.64rem;
+    border-top: 1px solid rgba(194, 226, 246, 0.18);
+    border-left: 1px solid rgba(194, 226, 246, 0.18);
+    background: rgba(8, 17, 26, 0.96);
+    transform: rotate(45deg);
+}
+
+.agent-context-rail .follow-up-bubble p {
+    margin: 0;
+    color: #edf7fb;
+    font-size: 1rem;
+    line-height: 1.62;
+    overflow-wrap: anywhere;
+}
+
+.follow-up-chat-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    min-width: 0;
+    min-height: 2.7rem;
+    margin-top: auto;
+    padding: 0.62rem 0.72rem;
+    border: 1px solid rgba(194, 226, 246, 0.14);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.agent-context-rail .follow-up-chat-bar span {
+    min-width: 0;
+    color: var(--muted);
+    font-size: 0.68rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    text-transform: none;
+}
+
+.agent-context-rail .follow-up-chat-bar .follow-up-send {
+    flex: 0 0 auto;
+    padding: 0.22rem 0.46rem;
+    border: 1px solid rgba(94, 183, 232, 0.18);
+    border-radius: 6px;
+    color: rgba(199, 211, 220, 0.72);
+    font-weight: 800;
+    text-transform: lowercase;
 }
 
 .agent-task-chips {
@@ -2184,6 +2318,15 @@ code {
         opacity: 0.52;
     }
 
+    .agent-context-rail {
+        grid-template-rows: repeat(4, auto) minmax(12rem, auto);
+        height: auto;
+    }
+
+    .agent-context-rail .agent-follow-up-prompt {
+        min-height: 12rem;
+    }
+
     .agent-report-header {
         flex-direction: column;
     }
@@ -2367,6 +2510,15 @@ code {
 
     .flow-detail > div {
         min-height: 305px;
+    }
+
+    .agent-context-rail .agent-follow-up-prompt {
+        min-height: 11rem;
+        padding: 0.85rem;
+    }
+
+    .follow-up-bubble {
+        padding: 0.85rem;
     }
 
     .tab-panel {

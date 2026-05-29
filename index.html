@@ -332,8 +332,8 @@ action: run guarded cleanup script</code></pre>
         <section id="ai-remediation" class="section ai-section" aria-labelledby="ai-agent-title">
             <div class="section-intro">
                 <p class="mono-label">// ai.agent.chat</p>
-                <h2 id="ai-agent-title">LogForge AI Agent performs Docker operations tasks.</h2>
-                <p>Operators chat with the agent for reports, explanations, incident investigation, and guarded remediation plans. Connect local models through Ollama while LogForge maintains a living operations graph behind the scenes across logs, Docker events, containers, incidents, deploy history, ownership, code, and docs. The private graph keeps context current, remembers relationships, and gives the model source-linked evidence instead of raw operational noise.</p>
+                <h2 id="ai-agent-title">The AI-native ingestion and control plane for Docker infrastructure.</h2>
+                <p>LogForge ingests logs, Docker events, containers, incidents, deploy history, ownership, code, and docs into an AI-native infrastructure layer built for agents first. Operators chat for reports, explanations, incident investigation, and guarded remediation, while LogForge compacts live operational state into structured, source-linked context the agent can reason over. Local models connect through Ollama, and control-plane actions remain governed by policy and operator approval.</p>
             </div>
 
             <div class="ai-agent-theater" aria-label="LogForge AI Agent animated chat demo">
@@ -457,6 +457,22 @@ action: run guarded cleanup script</code></pre>
                             <article>
                                 <span>local model connectivity with Ollama</span>
                                 <p>Keep operational context private to your LogForge deployment while routing agent tasks to local models.</p>
+                            </article>
+                            <article class="agent-follow-up-prompt" aria-label="LogForge AI Agent follow-up prompt">
+                                <div class="follow-up-agent-row">
+                                    <span class="follow-up-avatar" aria-hidden="true">AI</span>
+                                    <div class="follow-up-agent-meta">
+                                        <strong>LogForge AI Agent</strong>
+                                        <span>next agent action</span>
+                                    </div>
+                                </div>
+                                <div class="follow-up-bubble">
+                                    <p>Would you like me to create this as a PDF report and send it to your email, or schedule these reports from now on?</p>
+                                </div>
+                                <div class="follow-up-chat-bar" aria-hidden="true">
+                                    <span>Reply to export, email, or schedule...</span>
+                                    <span class="follow-up-send">send</span>
+                                </div>
                             </article>
                         </aside>
                     </div>
