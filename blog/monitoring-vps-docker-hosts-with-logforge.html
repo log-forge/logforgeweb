@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Monitor plain VPS Docker hosts with one stable LogForge Central and one outbound remote agent per server." />
+    <title>Monitoring Plain VPS Docker Hosts With LogForge - LogForge Blog</title>
+    <link rel="canonical" href="https://www.logforge.dev/blog/monitoring-vps-docker-hosts-with-logforge.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="icon" href="../assets/logo-32x32.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../styles.css" />
+</head>
+
+<body class="blog-page">
+    <div class="page-grid" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="LogForge home">
+            <img src="../assets/logforge-Icon-transparent-512x512.png" alt="" />
+            <span>LogForge</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="../#flow">Live flow</a>
+            <a href="../#incident">Incident delta</a>
+            <a href="../#compare">Compare</a>
+            <a href="../#templates">Templates</a>
+            <a href="./" aria-current="page">Blog</a>
+            <a href="../#premium">Premium</a>
+            <a href="../#install">Install</a>
+        </nav>
+
+        <a class="header-cta" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </header>
+
+    <main class="article-shell">
+        <article>
+            <header class="article-hero">
+                <div class="article-hero-copy">
+                    <p class="mono-label">// blog.guide.vps</p>
+                    <h1>Monitoring Plain VPS Docker Hosts With LogForge, Without Growing a Platform Team.</h1>
+                    <p class="article-dek">Run LogForge Central somewhere stable, enroll each VPS Docker host once, and keep the monitoring path outbound so your rented servers do not need extra inbound ports.</p>
+                    <p class="article-meta"><time datetime="2026-05-30">May 30, 2026</time> / vps / remote agents</p>
+                </div>
+
+                <aside class="article-hero-panel article-install-panel" aria-label="LogForge VPS monitoring shape">
+                    <span class="blog-card-meta">recommended shape</span>
+                    <div class="article-install-options">
+                        <div class="article-install-option">
+                            <strong>One Central</strong>
+                            <pre><code>https://logforge.example.com:8444/unicron</code></pre>
+                        </div>
+                        <div class="article-install-option">
+                            <strong>One agent per VPS</strong>
+                            <pre><code>rented VPS  ---&gt;  Central :9443</code></pre>
+                        </div>
+                    </div>
+                    <dl class="article-port-grid article-port-grid--compact">
+                        <div>
+                            <dt>9443</dt>
+                            <dd>Agent mTLS, reachable from VPS hosts</dd>
+                        </div>
+                        <div>
+                            <dt>8444</dt>
+                            <dd>Dashboard/API, private for admins</dd>
+                        </div>
+                    </dl>
+                </aside>
+            </header>
+
+            <div class="article-layout">
+                <aside class="article-sidebar" aria-label="Article navigation">
+                    <div class="article-side-card">
+                        <strong>Scenario</strong>
+                        <p>You have rented VPS hosts running Docker workloads, and you want one monitoring view without opening management ports on every server.</p>
+                    </div>
+                    <nav class="article-toc" aria-label="On this page">
+                        <strong>On this page</strong>
+                        <ol>
+                            <li><a href="#shape">Setup shape</a></li>
+                            <li><a href="#needs">What you need</a></li>
+                            <li><a href="#inventory">Inventory hosts</a></li>
+                            <li><a href="#reachability">Check reachability</a></li>
+                            <li><a href="#enroll">Enroll agents</a></li>
+                            <li><a href="#run">Run agents</a></li>
+                            <li><a href="#verify">Verify telemetry</a></li>
+                            <li><a href="#firewall">Provider firewalls</a></li>
+                            <li><a href="#optional-central">Optional Central on a VPS</a></li>
+                            <li><a href="#troubleshooting">Troubleshooting</a></li>
+                        </ol>
+                    </nav>
+                </aside>
+
+                <div class="article-prose">
+                    <section id="intro" aria-label="Introduction">
+                        <p>Plain VPS fleets are simple until they are not. One rented VM becomes three, a one-off Docker Compose service becomes a small production surface, and suddenly logs, restarts, disk checks, provider firewalls, and "which box is this container on?" become their own project.</p>
+                        <p>You do not need to grow a platform team just to watch a few Docker hosts. Keep one LogForge Central somewhere stable and reachable. Then install one LogForge remote agent on each plain VPS Docker host, whether those servers live at Hetzner, DigitalOcean, Linode, Vultr, a regional provider, or a private rack.</p>
+                        <p>The important part is the direction: each VPS phones home to Central. You avoid opening extra inbound LogForge ports on every rented server.</p>
+                    </section>
+
+                    <section id="shape">
+                        <h2>The Shape Of The Setup</h2>
+                        <p>The recommended setup has two pieces:</p>
+                        <ol>
+                            <li><strong>One LogForge Central.</strong> This is the dashboard, API, storage, auth, alerting, notifications, and agent enrollment service. Put it somewhere stable, backed up, and reachable from the VPS hosts.</li>
+                            <li><strong>One LogForge remote agent per VPS Docker host.</strong> The agent watches Docker, host metrics, container inventory, logs, and Docker events on that host, then sends telemetry back to Central.</li>
+                        </ol>
+                        <p>The network shape should stay boring:</p>
+                        <pre><code class="language-text">admin browser  ---&gt;  LogForge Central :8444/unicron
+VPS host       ---&gt;  LogForge Central :9443
+VPS host       ---&gt;  LogForge Central :9443
+VPS host       ---&gt;  LogForge Central :9443</code></pre>
+                        <p>Agents connect outbound to Central on <code>9443</code>. The LogForge dashboard and API live on <code>8444</code>, and that port can stay limited to administrators, a VPN, a private mesh, or a bastion.</p>
+                        <p>Your VPS hosts do not need inbound LogForge ports. They need outbound access to the Central agent mTLS endpoint.</p>
+                    </section>
+
+                    <section id="needs">
+                        <h2>Step 0: What You Need</h2>
+                        <p>On the Central machine:</p>
+                        <ul>
+                            <li>LogForge Central already installed with the public installer, Docker Compose, or another stable deployment method.</li>
+                            <li>Persistent storage for Central state and a backup plan for that storage.</li>
+                            <li>A reachable hostname, for example <code>logforge.example.com</code>.</li>
+                            <li>Inbound TCP <code>9443</code> from the VPS hosts that will run agents.</li>
+                            <li>Inbound TCP <code>8444</code> only from administrators, a VPN, a private mesh, or a bastion if you want remote dashboard access.</li>
+                        </ul>
+                        <p>On each VPS host:</p>
+                        <ul>
+                            <li>Linux with Docker installed and running.</li>
+                            <li>SSH access.</li>
+                            <li><code>sudo</code> access, or a user that can run Docker containers and mount the Docker socket.</li>
+                            <li>Outbound TCP access to Central on <code>9443</code>.</li>
+                            <li>Access to the provider firewall, security group, or cloud firewall policy that controls the server.</li>
+                        </ul>
+                        <p>For the examples below, replace this hostname with your real Central hostname:</p>
+                        <pre><code class="language-text">logforge.example.com</code></pre>
+                    </section>
+
+                    <section id="inventory">
+                        <h2>Step 1: Inventory VPS Hosts And Choose Agent Names</h2>
+                        <p>Write down the Docker hosts you actually want LogForge to monitor. The unit is the host, not the app and not the container.</p>
+                        <div class="article-table-wrap" aria-label="VPS inventory example" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Provider label</th>
+                                        <th scope="col">Reachable address</th>
+                                        <th scope="col">Agent name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>web-nyc-01</code></td>
+                                        <td><code>203.0.113.31</code></td>
+                                        <td><code>web-nyc-01</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>worker-fsn-01</code></td>
+                                        <td><code>198.51.100.42</code></td>
+                                        <td><code>worker-fsn-01</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>staging-ams-01</code></td>
+                                        <td><code>staging.example.net</code></td>
+                                        <td><code>staging-ams-01</code></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p>Choose stable, host-level agent names. Good names describe the physical or virtual host boundary:</p>
+                        <pre><code class="language-text">web-nyc-01
+api-prod-02
+worker-fsn-01
+staging-ams-01</code></pre>
+                        <p>Avoid names tied to a container release, Compose project, or app version. The agent should outlive normal application deploys because it monitors the VPS host itself.</p>
+                    </section>
+
+                    <section id="reachability">
+                        <h2>Step 2: Confirm Docker And Central Reachability</h2>
+                        <p>SSH into each VPS and confirm Docker is available:</p>
+                        <pre><code class="language-sh">ssh deploy@203.0.113.31 'docker ps'</code></pre>
+                        <p>If your user is not in the Docker group yet, test with <code>sudo</code> and decide whether you want to keep using it:</p>
+                        <pre><code class="language-sh">ssh deploy@203.0.113.31 'sudo docker ps'</code></pre>
+                        <p>Then confirm the VPS can reach Central's agent mTLS port:</p>
+                        <pre><code class="language-sh">ssh deploy@203.0.113.31 'nc -vz logforge.example.com 9443'</code></pre>
+                        <p>If <code>nc</code> is not installed, use Bash's TCP check:</p>
+                        <pre><code class="language-sh">ssh deploy@203.0.113.31 "timeout 5 bash -c '&lt;/dev/tcp/logforge.example.com/9443' &amp;&amp; echo 9443 reachable"</code></pre>
+                        <p>Repeat this for every VPS in your inventory. If <code>9443</code> fails, fix DNS, provider firewall rules, the Central host firewall, NAT, IPv6 routing, VPN policy, or tunnel configuration before you generate enrollment commands.</p>
+                        <aside class="article-note" aria-label="Dashboard reachability note">
+                            <p>The dashboard port is separate. A VPS can run an agent even if it cannot reach <code>8444</code>, as long as the generated command points at the right Central URLs and the host can reach <code>9443</code>.</p>
+                        </aside>
+                    </section>
+
+                    <section id="enroll">
+                        <h2>Step 3: Generate A Unique Enrollment Command Per VPS</h2>
+                        <p>In LogForge:</p>
+                        <ol>
+                            <li>Open <strong>Settings</strong>.</li>
+                            <li>Open <strong>Agents</strong>.</li>
+                            <li>Click <strong>Enroll New Agent</strong>.</li>
+                            <li>Use the stable host-level name you chose, for example <code>web-nyc-01</code> or <code>worker-fsn-01</code>.</li>
+                            <li>Set the Central URL to <code>https://logforge.example.com:8444/unicron</code>.</li>
+                            <li>Generate the enrollment command.</li>
+                        </ol>
+                        <p>The command should contain Central values like these:</p>
+                        <pre><code class="language-text">CENTRAL_URL=https://logforge.example.com:8444/unicron
+CENTRAL_MTLS_URL=https://logforge.example.com:9443
+CENTRAL_WS_URL=wss://logforge.example.com:9443/unicron/api/agent/ws</code></pre>
+                        <p>Generate one fresh command for each VPS. Enrollment tokens are short-lived and each agent gets its own identity, trust volume, and name. Reusing one command across multiple servers makes inventory confusing and can cause identity collisions.</p>
+                        <aside class="article-note">
+                            <p>Paste the real command from your LogForge UI, not an example from a guide. The enrollment token is single-use and expires quickly.</p>
+                        </aside>
+                    </section>
+
+                    <section id="run">
+                        <h2>Step 4: SSH Into Each VPS And Run Its Command</h2>
+                        <p>Open an SSH session to the matching host:</p>
+                        <pre><code class="language-sh">ssh deploy@203.0.113.31</code></pre>
+                        <p>Paste the enrollment command generated specifically for that host. If your Docker access requires root privileges, run the generated Docker command with <code>sudo</code> or run it from a root shell.</p>
+                        <p>Then confirm the agent container is running:</p>
+                        <pre><code class="language-sh">docker ps --filter "name=unicron-agent"
+docker logs -f unicron-agent-web-nyc-01</code></pre>
+                        <p>Move to the next VPS, generate a new command in LogForge, and run that new command on that server. A clean fleet ends up with a one-to-one mapping:</p>
+                        <div class="article-table-wrap" aria-label="VPS hosts and LogForge agents" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">VPS host</th>
+                                        <th scope="col">LogForge agent</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>203.0.113.31</code></td>
+                                        <td><code>web-nyc-01</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>198.51.100.42</code></td>
+                                        <td><code>worker-fsn-01</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>staging.example.net</code></td>
+                                        <td><code>staging-ams-01</code></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section id="verify">
+                        <h2>Step 5: Verify Agents, Containers, And Logs</h2>
+                        <p>Back in LogForge, open the agents view and confirm each VPS appears online. Then check the Docker views for the signals you expected:</p>
+                        <ul>
+                            <li>Each VPS appears once, under the agent name you chose.</li>
+                            <li>Docker containers from that host appear in container inventory.</li>
+                            <li>Container logs are visible for the workloads you care about.</li>
+                            <li>Host metrics and Docker events continue updating after you restart or redeploy an app container.</li>
+                        </ul>
+                        <p>If you use Docker Compose on the VPS, the agent should remain outside the application lifecycle. Recreating an app container should not recreate or rename the LogForge agent.</p>
+                    </section>
+
+                    <section id="firewall">
+                        <h2>Provider Firewall Rules That Match The Shape</h2>
+                        <p>Keep provider firewall rules focused on Central reachability instead of opening every rented server.</p>
+                        <div class="article-table-wrap" aria-label="LogForge VPS firewall ports" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Location</th>
+                                        <th scope="col">Port</th>
+                                        <th scope="col">Allow from</th>
+                                        <th scope="col">Purpose</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Central</td>
+                                        <td><code>9443/tcp</code></td>
+                                        <td>VPS egress IPs, provider private CIDRs, VPN CIDRs, or mesh subnet routes</td>
+                                        <td>Agent enrollment, mTLS WebSocket, and telemetry ingress</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Central</td>
+                                        <td><code>8444/tcp</code></td>
+                                        <td>Your admin IPs, VPN, bastion, or private mesh</td>
+                                        <td>Dashboard and API at <code class="article-url-code">https://logforge.example.com:8444/unicron</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td>VPS hosts</td>
+                                        <td>None</td>
+                                        <td>No inbound LogForge access required</td>
+                                        <td>Agents initiate outbound connections to Central</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p>On a simple Ubuntu Central host using UFW, that might look like:</p>
+                        <pre><code class="language-sh">sudo ufw allow from 203.0.113.31 to any port 9443 proto tcp
+sudo ufw allow from 198.51.100.42 to any port 9443 proto tcp
+sudo ufw allow from 192.0.2.0/24 to any port 9443 proto tcp
+sudo ufw allow from 198.51.100.25 to any port 8444 proto tcp
+sudo ufw status verbose</code></pre>
+                        <p>Replace those addresses with your real VPS egress IPs, provider private-network CIDRs, Tailscale subnet, WireGuard subnet, or admin ranges.</p>
+                        <p>The generated agent command may publish local input ports such as <code>24224</code>, <code>9880</code>, <code>4317</code>, and <code>4318</code> on the VPS host. Those are useful for local Fluent Bit and OTLP inputs. Do not add provider firewall inbound rules for those ports unless you intentionally want another machine to push telemetry into that agent.</p>
+                    </section>
+
+                    <section id="optional-central">
+                        <h2>Optional: Run Central On A VPS</h2>
+                        <p>The default recommendation is not "Central must be on a VPS." It is "Central must be stable." That can be an always-on workstation, a home server, a dedicated VM, a private cloud host, or a small VPS you treat carefully.</p>
+                        <p>Running Central on a VPS is acceptable when that VPS is:</p>
+                        <ul>
+                            <li>Stable enough to stay online independently of app deploys.</li>
+                            <li>Backed up, especially the LogForge data directory or Docker volume.</li>
+                            <li>Not casually rebuilt, resized, snapshotted, or destroyed as part of normal application work.</li>
+                            <li>Protected with the same firewall split: <code>9443</code> from agent hosts, <code>8444</code> from admins or a private network.</li>
+                        </ul>
+                        <p>If Central runs on one of the same rented servers as an app, keep the mental model separate. The app can churn. Central state should be deliberate. The other VPS hosts still get their own outbound remote agents.</p>
+                    </section>
+
+                    <section id="troubleshooting">
+                        <h2>Troubleshooting</h2>
+                        <h3>An agent stays offline.</h3>
+                        <p>Check the agent container logs on that VPS:</p>
+                        <pre><code class="language-sh">docker logs -f unicron-agent-web-nyc-01</code></pre>
+                        <p>Then confirm that server can reach Central on the agent mTLS port:</p>
+                        <pre><code class="language-sh">nc -vz logforge.example.com 9443</code></pre>
+                        <p>If <code>9443</code> fails, fix the Central firewall, provider firewall, DNS, routing, NAT, IPv6, VPN, or tunnel path first.</p>
+
+                        <h3>The dashboard works, but enrollment fails on <code>9443</code>.</h3>
+                        <p>The dashboard port and agent port are separate. <code>8444</code> reaching your browser does not prove <code>9443</code> reaches Central from the VPS. Test <code>9443</code> from the VPS itself and verify the generated command uses the expected mTLS URLs:</p>
+                        <pre><code class="language-text">CENTRAL_MTLS_URL=https://logforge.example.com:9443
+CENTRAL_WS_URL=wss://logforge.example.com:9443/unicron/api/agent/ws</code></pre>
+
+                        <h3>Several VPS hosts show up as one agent.</h3>
+                        <p>Generate a unique enrollment command for each VPS and give each host a unique agent name. Do not reuse one command across several servers.</p>
+
+                        <h3>Containers or logs are missing.</h3>
+                        <p>Confirm the generated command includes the Docker socket, the Docker container log directory, and the host root mount:</p>
+                        <pre><code class="language-text">/var/run/docker.sock
+/var/lib/docker/containers
+/</code></pre>
+                        <p>If the VPS uses a nonstandard Docker data root, adjust the generated <code>/var/lib/docker/containers</code> mount to match that host.</p>
+
+                        <h3>Docker says permission denied.</h3>
+                        <p>Run the generated command with <code>sudo</code>, or add your user to the Docker group and log in again:</p>
+                        <pre><code class="language-sh">sudo usermod -aG docker "$USER"</code></pre>
+                        <p>For the first install, using <code>sudo docker ...</code> is often the fastest way to separate Docker permissions from LogForge enrollment issues.</p>
+                    </section>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 LogForge. Docker alerts, routes, and guarded fixes from your own host.</p>
+        <a href="mailto:logforge@gmail.com">logforge@gmail.com</a>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+
+</html>
