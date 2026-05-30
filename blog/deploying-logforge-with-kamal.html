@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Monitor Kamal-managed Docker hosts with one stable LogForge Central and one outbound remote agent on each host." />
+    <title>Monitoring Kamal Deployments With LogForge - LogForge Blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="icon" href="../assets/logo-32x32.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../styles.css" />
+</head>
+
+<body class="blog-page">
+    <div class="page-grid" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="LogForge home">
+            <img src="../assets/logforge-Icon-transparent-512x512.png" alt="" />
+            <span>LogForge</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="../#flow">Live flow</a>
+            <a href="../#incident">Incident delta</a>
+            <a href="../#compare">Compare</a>
+            <a href="../#templates">Templates</a>
+            <a href="./" aria-current="page">Blog</a>
+            <a href="../#premium">Premium</a>
+            <a href="../#install">Install</a>
+        </nav>
+
+        <a class="header-cta" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </header>
+
+    <main class="article-shell">
+        <article>
+            <header class="article-hero">
+                <div class="article-hero-copy">
+                    <p class="mono-label">// blog.guide.kamal</p>
+                    <h1>Monitoring Kamal Deployments With LogForge, Without Inventing a Tiny Platform Team.</h1>
+                    <p class="article-dek">Keep one LogForge Central on a stable, reachable machine. Then enroll one remote agent on every Kamal-managed Docker host so the hosts phone home over mTLS.</p>
+                    <p class="article-meta"><time datetime="2026-05-30">May 30, 2026</time> / kamal / remote agents</p>
+                </div>
+
+                <aside class="article-hero-panel article-install-panel" aria-label="LogForge Kamal monitoring shape">
+                    <span class="blog-card-meta">recommended shape</span>
+                    <div class="article-install-options">
+                        <div class="article-install-option">
+                            <strong>One Central</strong>
+                            <pre><code>https://logforge.example.com:8444/unicron</code></pre>
+                        </div>
+                        <div class="article-install-option">
+                            <strong>One agent per host</strong>
+                            <pre><code>kamal host  ---&gt;  Central :9443</code></pre>
+                        </div>
+                    </div>
+                    <dl class="article-port-grid article-port-grid--compact">
+                        <div>
+                            <dt>9443</dt>
+                            <dd>Agent mTLS, reachable from Kamal hosts</dd>
+                        </div>
+                        <div>
+                            <dt>8444</dt>
+                            <dd>Dashboard/API, private for admins</dd>
+                        </div>
+                    </dl>
+                </aside>
+            </header>
+
+            <div class="article-layout">
+                <aside class="article-sidebar" aria-label="Article navigation">
+                    <div class="article-side-card">
+                        <strong>Scenario</strong>
+                        <p>Your apps run on Kamal-managed Docker hosts, and you want host logs, container inventory, and runtime signals without building a monitoring platform around the deploy tool.</p>
+                    </div>
+                    <nav class="article-toc" aria-label="On this page">
+                        <strong>On this page</strong>
+                        <ol>
+                            <li><a href="#shape">Monitoring shape</a></li>
+                            <li><a href="#needs">What you need</a></li>
+                            <li><a href="#hosts">Find Kamal hosts</a></li>
+                            <li><a href="#reachability">Check reachability</a></li>
+                            <li><a href="#enroll">Enroll agents</a></li>
+                            <li><a href="#run">Run agents</a></li>
+                            <li><a href="#verify">Verify telemetry</a></li>
+                            <li><a href="#firewall">Firewall rules</a></li>
+                            <li><a href="#proxy">Proxy notes</a></li>
+                            <li><a href="#optional-central">Optional Central management</a></li>
+                            <li><a href="#troubleshooting">Troubleshooting</a></li>
+                        </ol>
+                    </nav>
+                </aside>
+
+                <div class="article-prose">
+                    <section id="intro" aria-label="Introduction">
+                        <p>Kamal is nice when the problem is "put this container on that server and keep it there."</p>
+                        <p>Monitoring the servers behind that setup has a different default shape: do not turn every app deploy into an observability deploy. Run one LogForge Central somewhere stable, then put a LogForge remote agent on each Kamal Docker host.</p>
+                        <p>Central can live on an always-on workstation, a home server, a dedicated VM, or another reliable host you control. The important part is not that it is the largest machine. The important part is that it stays online, has persistent storage, is backed up, and is reachable from the Kamal hosts.</p>
+                    </section>
+
+                    <section id="shape">
+                        <h2>The Shape Of The Monitoring Setup</h2>
+                        <p>The recommended setup has two parts:</p>
+                        <ol>
+                            <li><strong>One LogForge Central.</strong> This is the web UI, API, storage, auth, alerting, notifications, and agent enrollment service.</li>
+                            <li><strong>One LogForge remote agent per Kamal Docker host.</strong> The agent watches Docker, host metrics, logs, and container inventory on that host, then sends telemetry back to Central.</li>
+                        </ol>
+                        <p>The network direction is the part worth getting right:</p>
+                        <pre><code class="language-text">admin browser  ---&gt;  LogForge Central :8444/unicron
+Kamal host     ---&gt;  LogForge Central :9443
+Kamal host     ---&gt;  LogForge Central :9443
+Kamal host     ---&gt;  LogForge Central :9443</code></pre>
+                        <p>Agents connect outbound to Central on <code>9443</code>. Your Kamal application hosts do not need inbound LogForge ports. Dashboard access on <code>8444</code> can stay private behind a VPN, private network, bastion, or admin-only firewall rule.</p>
+                        <p>That keeps Kamal focused on deploying your applications and keeps LogForge focused on watching the hosts those applications run on.</p>
+                    </section>
+
+                    <section id="needs">
+                        <h2>Step 0: What You Need</h2>
+                        <p>On the Central machine:</p>
+                        <ul>
+                            <li>LogForge Central already installed, either with the public installer, Docker Compose, or another stable deployment method.</li>
+                            <li>Persistent storage for Central state and backups for that state.</li>
+                            <li>A reachable hostname, for example <code>logforge.example.com</code>.</li>
+                            <li>Inbound TCP <code>9443</code> from every Kamal Docker host that will run an agent.</li>
+                            <li>Inbound TCP <code>8444</code> only from administrators, a VPN, or a private network if you want to open the dashboard remotely.</li>
+                        </ul>
+                        <p>On each Kamal-managed host:</p>
+                        <ul>
+                            <li>Linux with Docker installed.</li>
+                            <li>SSH access.</li>
+                            <li>Outbound access to Central on TCP <code>9443</code>.</li>
+                            <li>Permission to run Docker containers and mount the Docker socket.</li>
+                        </ul>
+                        <p>In your Kamal repo:</p>
+                        <ul>
+                            <li>A <code>config/deploy.yml</code> that lists the target hosts you want to monitor.</li>
+                        </ul>
+                        <p>For the examples below, replace this value with your real Central hostname:</p>
+                        <pre><code class="language-text">logforge.example.com</code></pre>
+                    </section>
+
+                    <section id="hosts">
+                        <h2>Step 1: Identify The Kamal Target Hosts</h2>
+                        <p>Open the Kamal app's <code>config/deploy.yml</code> and find the <code>servers</code> section. Depending on your Kamal version and app shape, it may look like a simple list:</p>
+                        <pre><code class="language-yaml">servers:
+  - 203.0.113.21
+  - 203.0.113.22</code></pre>
+                        <p>Or it may be grouped by role:</p>
+                        <pre><code class="language-yaml">servers:
+  web:
+    hosts:
+      - 203.0.113.21
+      - 203.0.113.22
+  job:
+    hosts:
+      - 203.0.113.23</code></pre>
+                        <p>Each Docker host that runs your Kamal-managed containers should get exactly one LogForge agent. Do not install one agent per app, per container, per role, or per deploy. The host is the monitoring boundary.</p>
+                        <p>If your deploy file uses hostnames instead of IP addresses, keep the names. They make better agent names and better dashboards:</p>
+                        <pre><code class="language-text">app-01.internal.example.com
+app-02.internal.example.com
+worker-01.internal.example.com</code></pre>
+                    </section>
+
+                    <section id="reachability">
+                        <h2>Step 2: Confirm Docker And Central Reachability</h2>
+                        <p>SSH into each Kamal host and confirm Docker is running:</p>
+                        <pre><code class="language-sh">ssh deploy@203.0.113.21 'docker ps'</code></pre>
+                        <p>Then test that the host can reach Central's agent mTLS port:</p>
+                        <pre><code class="language-sh">ssh deploy@203.0.113.21 'nc -vz logforge.example.com 9443'</code></pre>
+                        <p>If <code>nc</code> is not installed on the host, use Bash's TCP check:</p>
+                        <pre><code class="language-sh">ssh deploy@203.0.113.21 "timeout 5 bash -c '&lt;/dev/tcp/logforge.example.com/9443' &amp;&amp; echo 9443 reachable"</code></pre>
+                        <p>Repeat that for every host from <code>config/deploy.yml</code>. If the test fails, fix DNS, cloud firewall rules, host firewall rules, NAT, VPN routing, or tunnel policy before generating enrollment commands.</p>
+                        <aside class="article-note" aria-label="Dashboard reachability note">
+                            <p>The dashboard port is separate. A Kamal host can run an agent even if it cannot reach <code>8444</code>, as long as the generated command has the correct Central URLs and the host can reach <code>9443</code>.</p>
+                        </aside>
+                    </section>
+
+                    <section id="enroll">
+                        <h2>Step 3: Generate One Enrollment Command Per Host</h2>
+                        <p>In LogForge:</p>
+                        <ol>
+                            <li>Open <strong>Settings</strong>.</li>
+                            <li>Open <strong>Agents</strong>.</li>
+                            <li>Click <strong>Enroll New Agent</strong>.</li>
+                            <li>Use a host-level name, for example <code>app-01</code>, <code>web-prod-02</code>, or <code>worker-01</code>.</li>
+                            <li>Set the Central URL to <code>https://logforge.example.com:8444/unicron</code>.</li>
+                            <li>Generate the enrollment command.</li>
+                        </ol>
+                        <p>The generated command should include Central values like these:</p>
+                        <pre><code class="language-text">CENTRAL_URL=https://logforge.example.com:8444/unicron
+CENTRAL_MTLS_URL=https://logforge.example.com:9443
+CENTRAL_WS_URL=wss://logforge.example.com:9443/unicron/api/agent/ws</code></pre>
+                        <p>Generate a fresh command for each Kamal host. Enrollment tokens are short-lived and each agent gets its own identity. Reusing one command across multiple hosts makes the fleet harder to understand and harder to repair.</p>
+                    </section>
+
+                    <section id="run">
+                        <h2>Step 4: SSH Into Each Kamal Host And Run The Agent</h2>
+                        <p>Paste the generated command on the matching host:</p>
+                        <pre><code class="language-sh">ssh deploy@203.0.113.21
+# paste the app-01 enrollment command generated by LogForge</code></pre>
+                        <p>Then check the container:</p>
+                        <pre><code class="language-sh">docker ps --filter "name=unicron-agent"
+docker logs -f unicron-agent-app-01</code></pre>
+                        <p>Move to the next host, generate a new command in LogForge, and run that new command on that host. A small fleet usually ends up with a clean one-to-one list:</p>
+                        <div class="article-table-wrap" aria-label="Kamal hosts and LogForge agents" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Kamal host</th>
+                                        <th scope="col">LogForge agent</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>203.0.113.21</code></td>
+                                        <td><code>app-01</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>203.0.113.22</code></td>
+                                        <td><code>app-02</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>203.0.113.23</code></td>
+                                        <td><code>worker-01</code></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section id="verify">
+                        <h2>Step 5: Verify Agents And Container Inventory</h2>
+                        <p>Back in LogForge, open the agents view and confirm each host appears online. Then check the Docker views for the useful signals:</p>
+                        <ul>
+                            <li>The host appears once, under the agent name you chose.</li>
+                            <li>Kamal-managed app containers appear in the container inventory.</li>
+                            <li>Container logs are visible for the app containers you expect to monitor.</li>
+                            <li>Host metrics and Docker events continue updating after a deploy.</li>
+                        </ul>
+                        <p>If a Kamal deploy replaces an app container, the LogForge agent should stay put. It is monitoring the Docker host, not riding along with the application release.</p>
+                    </section>
+
+                    <section id="firewall">
+                        <h2>Firewall Rules That Match The Shape</h2>
+                        <p>Put firewall rules on Central deliberately:</p>
+                        <div class="article-table-wrap" aria-label="LogForge Kamal firewall ports" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Port</th>
+                                        <th scope="col">Allow from</th>
+                                        <th scope="col">Purpose</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>9443/tcp</code></td>
+                                        <td>Every Kamal Docker host that will run a LogForge agent</td>
+                                        <td>Agent enrollment, mTLS WebSocket, and telemetry ingress</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>8444/tcp</code></td>
+                                        <td>Your admin IPs, VPN, bastion, or private mesh</td>
+                                        <td>Dashboard and API at <code class="article-url-code">https://logforge.example.com:8444/unicron</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>80/tcp</code>, <code>443/tcp</code></td>
+                                        <td>Only if your normal web proxy needs them</td>
+                                        <td>Not required for LogForge agents when <code>9443</code> is reachable directly</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p>On a simple Ubuntu Central host using UFW, that might be:</p>
+                        <pre><code class="language-sh">sudo ufw allow from 203.0.113.21 to any port 9443 proto tcp
+sudo ufw allow from 203.0.113.22 to any port 9443 proto tcp
+sudo ufw allow from 203.0.113.23 to any port 9443 proto tcp
+sudo ufw allow from 198.51.100.25 to any port 8444 proto tcp
+sudo ufw status verbose</code></pre>
+                        <p>Replace those addresses with your real Kamal host egress IPs, VPC CIDRs, Tailscale subnet, WireGuard subnet, or admin ranges.</p>
+                        <p>The Kamal application hosts do not need inbound LogForge ports. They initiate the connection to Central.</p>
+                    </section>
+
+                    <section id="proxy">
+                        <h2>SSL And Proxy Notes</h2>
+                        <p>LogForge Central exposes an HTTPS dashboard and a separate mTLS endpoint for agents. The mTLS endpoint is not a normal website. Do not put <code>9443</code> behind an HTTP reverse proxy that terminates TLS. Agents need to reach Central's mTLS listener.</p>
+                        <p>If you want a cleaner public dashboard URL, keep the separation:</p>
+                        <ul>
+                            <li>Keep the dashboard private on <code>:8444</code> and access it through Tailscale, WireGuard, or a bastion.</li>
+                            <li>Put only the dashboard behind a reverse proxy that forwards WebSocket traffic and talks to the appliance on <code>8444</code>. Leave <code>9443</code> as direct TCP to Central.</li>
+                            <li>Use a TCP-capable proxy for the agent port only if it preserves mTLS through to LogForge Central.</li>
+                        </ul>
+                        <p>For a first install, make <code>9443</code> reachable from the Kamal hosts and keep <code>8444</code> limited to administrators. Add proxy polish after the agents are online.</p>
+                    </section>
+
+                    <section id="optional-central">
+                        <h2>Optional: Manage Central With Kamal</h2>
+                        <p>The default recommendation is still one stable Central plus agents on the Kamal hosts. If the most reliable place for Central is itself a Kamal-managed Docker server, you can manage Central as a long-lived accessory-style service. Treat that as a Central hosting choice, not as the monitoring pattern.</p>
+                        <p>The LogForge-specific part of the Kamal config can look like this:</p>
+                        <pre><code class="language-yaml">accessories:
+  logforge:
+    service: logforge-central
+    image: logforge/unicron:latest
+    host: 203.0.113.10
+    port: "8444:443"
+    env:
+      clear:
+        TMPDIR: /run/pyinstaller
+        UNICRON_APPLIANCE_CONTAINER_NAME: logforge-central
+        UNICRON_CENTRAL_FQDN: logforge.example.com
+        UNICRON_CENTRAL_PORT: "443"
+        UNICRON_PUBLIC_CENTRAL_PORT: "8444"
+        UNICRON_CENTRAL_MTLS_PORT: "8443"
+        UNICRON_PUBLIC_CENTRAL_MTLS_PORT: "9443"
+        UNICRON_DATA_DIR: /var/lib/unicron
+        LOCAL_AGENT_CENTRAL_URL: https://unicron.central/unicron
+        LOCAL_AGENT_DOCKER_NETWORK: kamal
+        CENTRAL_ADMIN_USERNAME: admin
+        CENTRAL_ADMIN_RECOVERY_OVERRIDE: "false"
+      secret:
+        - CENTRAL_ADMIN_PASSWORD
+    volumes:
+      - unicron-data:/var/lib/unicron
+      - /var/run/docker.sock:/var/run/docker.sock
+    options:
+      publish:
+        - "9443:8443"
+      read-only: true
+      tmpfs:
+        - /tmp:rw,nosuid,nodev,mode=1777,size=256m
+        - /run:rw,nosuid,nodev,mode=755,size=64m
+        - /run/pyinstaller:rw,nosuid,nodev,exec,mode=1777,size=256m
+      cap-drop:
+        - ALL
+      cap-add:
+        - CHOWN
+        - DAC_OVERRIDE
+        - FOWNER
+        - KILL
+        - SETGID
+        - SETUID
+        - NET_BIND_SERVICE
+      security-opt:
+        - no-new-privileges:true
+      add-host:
+        - unicron-stepca:127.0.0.1
+        - unicron-stepca-ra:127.0.0.1
+        - unicron.central:127.0.0.1</code></pre>
+                        <p>Store the admin password in Kamal secrets:</p>
+                        <pre><code class="language-sh">mkdir -p .secrets
+openssl rand -base64 32 &gt; .secrets/logforge_admin_password
+chmod 600 .secrets/logforge_admin_password</code></pre>
+                        <p>Add this to <code>.kamal/secrets</code> or your existing secret provider wiring:</p>
+                        <pre><code class="language-sh">CENTRAL_ADMIN_PASSWORD=$(cat .secrets/logforge_admin_password)</code></pre>
+                        <p>Boot and inspect only the Central service:</p>
+                        <pre><code class="language-sh">kamal accessory boot logforge
+kamal accessory details logforge
+kamal accessory logs logforge</code></pre>
+                        <p>For upgrades, pin the image tag you want, update <code>config/deploy.yml</code>, then reboot that service intentionally:</p>
+                        <pre><code class="language-sh">kamal accessory reboot logforge
+kamal accessory logs logforge</code></pre>
+                        <p>Remember the separation: managing Central with Kamal does not replace installing agents on the other Kamal Docker hosts. The agents are still what monitor the fleet.</p>
+                    </section>
+
+                    <section id="backups">
+                        <h2>Backups</h2>
+                        <p>Back up Central, wherever it runs. The state that matters is Central's data directory or Docker volume. If you manage Central with the optional Kamal service above, that volume is:</p>
+                        <pre><code class="language-text">unicron-data:/var/lib/unicron</code></pre>
+                        <p>For a quiet backup in that optional setup, stop the Central service, archive the volume, then start it again:</p>
+                        <pre><code class="language-sh">kamal accessory stop logforge
+ssh root@203.0.113.10 'mkdir -p /root/logforge-backups &amp;&amp; docker run --rm -v unicron-data:/data:ro -v /root/logforge-backups:/backup alpine tar czf /backup/unicron-data-$(date +%F).tgz -C /data .'
+kamal accessory start logforge</code></pre>
+                        <p>If Central runs on a workstation, home server, or dedicated VM through Docker Compose, back up the Compose volume or bound data directory there instead. The fleet agents can be recreated from LogForge enrollment, but Central state is the thing you do not want to lose.</p>
+                    </section>
+
+                    <section id="troubleshooting">
+                        <h2>Troubleshooting</h2>
+                        <h3>A Kamal host cannot enroll.</h3>
+                        <p>Test the agent port from that host:</p>
+                        <pre><code class="language-sh">nc -vz logforge.example.com 9443</code></pre>
+                        <p>If that fails, fix DNS, Central firewall rules, cloud security groups, IPv6 routing, NAT, or VPN policy. The Kamal host needs outbound access to Central on <code>9443</code>.</p>
+
+                        <h3>The dashboard opens, but agents stay offline.</h3>
+                        <p>The dashboard port and the agent port are separate. Confirm the generated command points at the mTLS endpoint:</p>
+                        <pre><code class="language-text">CENTRAL_MTLS_URL=https://logforge.example.com:9443
+CENTRAL_WS_URL=wss://logforge.example.com:9443/unicron/api/agent/ws</code></pre>
+                        <p>Then check the agent logs on the Kamal host:</p>
+                        <pre><code class="language-sh">docker logs -f unicron-agent-app-01</code></pre>
+
+                        <h3>Only one host appears, even though you installed several agents.</h3>
+                        <p>Generate a unique enrollment command for each host and give each host a unique agent name. Reusing one command across several hosts can make identities collide or produce misleading inventory.</p>
+
+                        <h3>Kamal deploys work, but LogForge misses containers.</h3>
+                        <p>Confirm the agent container has access to the Docker socket and Docker container log directory. The generated command should include mounts for <code>/var/run/docker.sock</code> and <code>/var/lib/docker/containers</code>.</p>
+
+                        <h3>You are not already using Kamal.</h3>
+                        <p>Use the normal installer first:</p>
+                        <pre><code class="language-sh">curl -fsSL https://www.logforge.dev/install.sh | sh</code></pre>
+                        <p>Kamal is relevant here because the monitored hosts are Kamal-managed Docker servers. If you only need one Central on one VM, Docker Compose is still a perfectly respectable answer.</p>
+                    </section>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 LogForge. Docker alerts, routes, and guarded fixes from your own host.</p>
+        <a href="mailto:logforge@gmail.com">logforge@gmail.com</a>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+
+</html>
