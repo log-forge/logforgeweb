@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="LogForge blog posts and practical guides for monitoring Docker hosts, remote agents, alerting, and self-hosted operations." />
+    <title>Blog - LogForge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="icon" href="../assets/logo-32x32.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../styles.css" />
+</head>
+
+<body class="blog-page">
+    <div class="page-grid" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="LogForge home">
+            <img src="../assets/logforge-Icon-transparent-512x512.png" alt="" />
+            <span>LogForge</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="../#flow">Live flow</a>
+            <a href="../#incident">Incident delta</a>
+            <a href="../#compare">Compare</a>
+            <a href="../#templates">Templates</a>
+            <a href="./" aria-current="page">Blog</a>
+            <a href="../#premium">Premium</a>
+            <a href="../#install">Install</a>
+        </nav>
+
+        <a class="header-cta" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </header>
+
+    <main class="blog-main">
+        <section class="blog-hero" aria-labelledby="blog-title">
+            <div class="blog-hero-layout">
+                <div>
+                    <p class="mono-label">// blog.index</p>
+                    <h1 id="blog-title">LogForge field notes</h1>
+                    <p>Practical guides for Docker monitoring, remote hosts, alert routing, and the parts of self-hosting that usually hide in the margins.</p>
+                </div>
+
+                <aside class="blog-hero-panel" aria-label="Blog focus areas">
+                    <span class="blog-card-meta">current focus</span>
+                    <p>Remote Docker hosts, EC2 agents, self-hosted defaults, and keeping observability setup small enough to finish before lunch gets cold.</p>
+                </aside>
+            </div>
+        </section>
+
+        <section class="post-list" aria-label="Blog posts">
+            <a class="post-card" href="monitoring-ec2-with-logforge.html">
+                <div class="post-card-copy">
+                    <span class="post-meta"><time datetime="2026-05-29">May 29, 2026</time> / guide / ec2</span>
+                    <h2>Monitoring EC2 With LogForge, Without Turning Your Afternoon Into an IAM Side Quest</h2>
+                    <p>Run LogForge Central on a machine you control, enroll EC2 Docker hosts as agents, and keep inbound security group rules focused on Central instead of every instance.</p>
+                    <span class="blog-read-more">Read article</span>
+                </div>
+                <figure class="post-card-media" aria-label="LogForge dashboard preview">
+                    <img src="../assets/logforge-home.png" alt="LogForge dashboard showing Docker monitoring views" loading="lazy" />
+                </figure>
+            </a>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 LogForge. Docker alerts, routes, and guarded fixes from your own host.</p>
+        <a href="mailto:logforge@gmail.com">logforge@gmail.com</a>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+
+</html>

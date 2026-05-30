@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Monitor EC2 Docker hosts with LogForge Central and remote agents without setting up a full CloudWatch log pipeline." />
+    <title>Monitoring EC2 With LogForge - LogForge Blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="icon" href="../assets/logo-32x32.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../styles.css" />
+</head>
+
+<body class="blog-page">
+    <div class="page-grid" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="LogForge home">
+            <img src="../assets/logforge-Icon-transparent-512x512.png" alt="" />
+            <span>LogForge</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="../#flow">Live flow</a>
+            <a href="../#incident">Incident delta</a>
+            <a href="../#compare">Compare</a>
+            <a href="../#templates">Templates</a>
+            <a href="./" aria-current="page">Blog</a>
+            <a href="../#premium">Premium</a>
+            <a href="../#install">Install</a>
+        </nav>
+
+        <a class="header-cta" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </header>
+
+    <main class="article-shell">
+        <article>
+            <header class="article-hero">
+                <div class="article-hero-copy">
+                    <p class="mono-label">// blog.guide.ec2</p>
+                    <h1>Monitoring EC2 With LogForge, Without Turning Your Afternoon Into an IAM Side Quest</h1>
+                    <p class="article-dek">Run LogForge Central on your own machine, enroll each EC2 Docker host as an agent, and keep the monitoring setup simple enough that it does not become the project.</p>
+                    <p class="article-meta"><time datetime="2026-05-29">May 29, 2026</time> / remote agents / docker monitoring</p>
+                </div>
+
+                <aside class="article-hero-panel article-install-panel" aria-label="LogForge install options">
+                    <span class="blog-card-meta">install options</span>
+                    <div class="article-install-options">
+                        <div class="article-install-option">
+                            <strong>Recommended</strong>
+                            <pre><code>curl -fsSL https://www.logforge.dev/install.sh | sh</code></pre>
+                        </div>
+                        <div class="article-install-option">
+                            <strong>Manual Docker Compose</strong>
+                            <pre><code>git clone https://github.com/log-forge/logforge.git
+cd logforge
+docker compose pull
+docker compose up -d</code></pre>
+                        </div>
+                    </div>
+                    <dl class="article-port-grid article-port-grid--compact">
+                        <div>
+                            <dt>8444</dt>
+                            <dd>Dashboard/API at <code>/unicron</code></dd>
+                        </div>
+                        <div>
+                            <dt>9443</dt>
+                            <dd>Agent mTLS</dd>
+                        </div>
+                    </dl>
+                </aside>
+            </header>
+
+            <div class="article-layout">
+                <aside class="article-sidebar" aria-label="Article navigation">
+                    <div class="article-side-card">
+                        <strong>Scenario</strong>
+                        <p>A few EC2 boxes are running Docker workloads, and you want one place to watch them without building an AWS-native observability stack first.</p>
+                    </div>
+                    <nav class="article-toc" aria-label="On this page">
+                        <strong>On this page</strong>
+                        <ol>
+                            <li><a href="#shape">Setup shape</a></li>
+                            <li><a href="#needs">What you need</a></li>
+                            <li><a href="#central">Start Central</a></li>
+                            <li><a href="#reachability">Check reachability</a></li>
+                            <li><a href="#command">Generate command</a></li>
+                            <li><a href="#ec2">Run on EC2</a></li>
+                            <li><a href="#security-groups">Security groups</a></li>
+                            <li><a href="#troubleshooting">Troubleshooting</a></li>
+                        </ol>
+                    </nav>
+                </aside>
+
+                <div class="article-prose">
+                    <section id="intro" aria-label="Introduction">
+                        <p>What do you do when you want to monitor your EC2 instances?</p>
+                        <p>Set up CloudWatch, right?</p>
+                        <p>That is the default answer, and it is not a bad answer. CloudWatch is powerful. It is also the kind of powerful where a simple "I want to see what my instance is doing" can turn into IAM roles, agent packages, log groups, JSON config files, retention policies, pricing tabs, and one browser tab you keep open only because you are afraid closing it will break the spell.</p>
+                        <p>There is a simpler way if your goal is: "I have a few EC2 boxes running Docker workloads, and I want one place to watch them."</p>
+                        <p>Run LogForge Central on your personal machine, workstation, home server, or whichever device has the most comfortable amount of CPU, memory, and disk. Then run the LogForge remote agent on each EC2 instance. Central stays yours. The EC2 instances phone home.</p>
+                        <p>No CloudWatch agent ceremony required.</p>
+                    </section>
+
+                    <section id="shape">
+                        <h2>The Shape Of The Setup</h2>
+                        <p>The setup has two parts:</p>
+                        <ol>
+                            <li><strong>LogForge Central.</strong> This is the web UI, API, storage, auth, alerting, notifications, and agent enrollment service. In the public Docker Compose install, it runs as one appliance container.</li>
+                            <li><strong>LogForge agent.</strong> This runs on each EC2 instance you want to monitor. It watches Docker, host metrics, logs, and container inventory, then sends telemetry back to Central over LogForge's mTLS endpoint.</li>
+                        </ol>
+                        <p>The important network detail for agents is direction:</p>
+                        <pre><code class="language-text">EC2 agent  ---&gt;  your LogForge Central mTLS port</code></pre>
+                        <p>Your EC2 instances do not need inbound ports opened for LogForge. They need outbound access to your Central machine. Central must be reachable from those EC2 instances.</p>
+                        <p>The current public install exposes two host ports:</p>
+                        <div class="article-table-wrap" role="region" aria-label="LogForge public install ports" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Setting</th>
+                                        <th scope="col">Default</th>
+                                        <th scope="col">Used for</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>UNICRON_APP_PORT</code></td>
+                                        <td><code>8444</code></td>
+                                        <td>LogForge web UI and API at <code class="article-url-code">https://&lt;your-central-host&gt;:8444/unicron</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>UNICRON_AGENT_MTLS_PORT</code></td>
+                                        <td><code>9443</code></td>
+                                        <td>Agent mTLS enrollment, WebSocket, and telemetry ingress</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p>If your Central machine is behind a home router, office firewall, or laptop Wi-Fi, you need one of these before EC2 can reach it:</p>
+                        <ul>
+                            <li>A DNS name pointing at the Central machine, plus port forwarding for <code>UNICRON_AGENT_MTLS_PORT</code>. Forward <code>UNICRON_APP_PORT</code> too if you want to open the dashboard from outside that network.</li>
+                            <li>A private network overlay such as WireGuard, Tailscale, or ZeroTier where EC2 can reach the Central host by a stable name.</li>
+                            <li>A reverse tunnel or proxy that forwards the browser/API port and the mTLS port.</li>
+                            <li>Or, if you decide your "most powerful device" is actually another cloud VM, run Central there instead.</li>
+                        </ul>
+                        <p>For the rest of this guide, I will use:</p>
+                        <pre><code class="language-text">logforge.example.com</code></pre>
+                        <p>Replace it with your real DNS name or reachable tunnel hostname.</p>
+                    </section>
+
+                    <section id="needs">
+                        <h2>Step 0: What You Need</h2>
+                        <p>On the Central machine:</p>
+                        <ul>
+                            <li>Docker</li>
+                            <li>Docker Compose</li>
+                            <li>A reachable hostname, like <code>logforge.example.com</code></li>
+                            <li>Browser access to <code>UNICRON_APP_PORT</code>, default <code>8444</code>, from wherever you administer LogForge</li>
+                            <li>TCP <code>UNICRON_AGENT_MTLS_PORT</code>, default <code>9443</code>, reachable from your EC2 instances</li>
+                        </ul>
+                        <p>On each EC2 instance:</p>
+                        <ul>
+                            <li>Linux with Docker installed</li>
+                            <li>Outbound access to Central on <code>UNICRON_AGENT_MTLS_PORT</code>, default <code>9443</code></li>
+                            <li>Permission to run Docker containers</li>
+                        </ul>
+                        <p>The LogForge agent is built for Docker hosts. If your EC2 instance is not running Docker yet, install and start Docker first. On Amazon Linux 2023, that usually looks like:</p>
+                        <pre><code class="language-sh">sudo dnf update -y
+sudo dnf install -y docker
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"</code></pre>
+                        <p>After adding your user to the <code>docker</code> group, log out and back in, or use <code>sudo docker</code> for the first run.</p>
+                    </section>
+
+                    <section id="central">
+                        <h2>Step 1: Start LogForge Central</h2>
+                        <p>On the machine where Central will live, run the public installer:</p>
+                        <pre><code class="language-sh">curl -fsSL https://www.logforge.dev/install.sh | sh</code></pre>
+                        <p>The installer clones or updates the public repo, starts LogForge with Docker Compose, and prints the local URL:</p>
+                        <pre><code class="language-text">https://localhost:8444/unicron</code></pre>
+                        <p>Open that on the Central machine. If you are connecting from another machine, replace <code>localhost</code> with your reachable hostname:</p>
+                        <pre><code class="language-text">https://logforge.example.com:8444/unicron</code></pre>
+                        <p>If you prefer to run the commands yourself, use the public repo flow:</p>
+                        <pre><code class="language-sh">git clone https://github.com/log-forge/logforge.git
+cd logforge
+docker compose pull
+docker compose up -d
+docker compose ps</code></pre>
+                        <p>The public repo includes <code>.env</code>. You do not need to create one by hand for the default install. If the dashboard port conflicts, change <code>UNICRON_APP_PORT</code>. If the agent mTLS port conflicts, change <code>UNICRON_AGENT_MTLS_PORT</code>. Then recreate the container so Docker Compose reads the new values:</p>
+                        <pre><code class="language-sh">docker compose up -d
+docker compose ps</code></pre>
+                        <p>If you did not set <code>CENTRAL_ADMIN_PASSWORD</code>, LogForge generates a first-boot admin password and logs it once. Fetch it with:</p>
+                        <pre><code class="language-sh">docker logs unicron-appliance | grep -E "Local admin first-boot generated administrator credential|generatedPassword"</code></pre>
+                        <p>Log in as <code>admin</code> using that generated password.</p>
+                        <aside class="article-note">
+                            <p><strong>Developer note:</strong> if your browser complains about the certificate, that is expected for a local-first appliance unless you have put a public certificate in front of it. The agents do not blindly trust the browser certificate; enrollment includes a CA fingerprint so the agent can bootstrap trust against Central.</p>
+                        </aside>
+                    </section>
+
+                    <section id="reachability">
+                        <h2>Step 2: Check Central Reachability From EC2</h2>
+                        <p>Before generating agent commands, SSH into one EC2 instance and make sure it can reach Central's agent mTLS port.</p>
+                        <pre><code class="language-sh">nc -vz logforge.example.com 9443</code></pre>
+                        <p>If <code>nc</code> is not installed:</p>
+                        <pre><code class="language-sh">timeout 5 bash -c '&lt;/dev/tcp/logforge.example.com/9443' &amp;&amp; echo "9443 reachable"</code></pre>
+                        <p>If you changed <code>UNICRON_AGENT_MTLS_PORT</code>, use that value instead of <code>9443</code>.</p>
+                        <p>If you also want to confirm browser/API reachability from that EC2 instance, test the dashboard port separately:</p>
+                        <pre><code class="language-sh">curl -kI https://logforge.example.com:8444/unicron</code></pre>
+                        <p>If this fails but the mTLS port works, agent enrollment can still work. It just means that EC2 instance cannot reach the dashboard/API port.</p>
+                        <p>If the mTLS test fails, do not keep clicking around in the UI hoping vibes will fix routing. Fix DNS, firewall rules, security groups, port forwarding, or your tunnel first. The agent command will only work if the EC2 instance can reach Central's mTLS endpoint.</p>
+                    </section>
+
+                    <section id="command">
+                        <h2>Step 3: Generate An Agent Command</h2>
+                        <p>In LogForge:</p>
+                        <ol>
+                            <li>Go to <strong>Settings</strong>.</li>
+                            <li>Open <strong>Agents</strong>.</li>
+                            <li>Click <strong>Enroll New Agent</strong>.</li>
+                            <li>Choose a clear agent name, for example:</li>
+                        </ol>
+                        <pre><code class="language-text">api-prod-i-0123456789abcdef0</code></pre>
+                        <ol start="5">
+                            <li>Set the Central URL to:</li>
+                        </ol>
+                        <pre><code class="language-text">https://logforge.example.com:8444/unicron</code></pre>
+                        <ol start="6">
+                            <li>Keep <strong>Memory only</strong> queue mode for a first install, unless you specifically want durable local buffering during Central outages.</li>
+                            <li>Click <strong>Generate Enrollment Command</strong>.</li>
+                        </ol>
+                        <p>LogForge will generate a command that looks roughly like this:</p>
+                        <pre><code class="language-sh"># Reinstall is idempotent: remove any old container with this agent name.
+# Reset only the agent identity/trust volume for this fresh enrollment.
+# Durable telemetry queue volumes are preserved when explicitly enabled.
+docker rm -f unicron-agent-api-prod-i-0123456789abcdef0 2&gt;/dev/null || true
+docker volume rm unicron-agent-api-prod-i-0123456789abcdef0-data 2&gt;/dev/null || true
+docker run -d --name unicron-agent-api-prod-i-0123456789abcdef0 \
+  --restart unless-stopped \
+  -p 24224:24224 \
+  -p 9880:9880 \
+  -p 4317:4317 \
+  -p 4318:4318 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /:/host/root:ro \
+  -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
+  -v unicron-agent-api-prod-i-0123456789abcdef0-data:/agent-data \
+  -e AGENT_NAME=api-prod-i-0123456789abcdef0 \
+  -e CENTRAL_WS_URL=wss://logforge.example.com:9443/unicron/api/agent/ws \
+  -e CENTRAL_URL=https://logforge.example.com:8444/unicron \
+  -e CENTRAL_MTLS_URL=https://logforge.example.com:9443 \
+  -e ENROLL_TOKEN=&lt;one-time-token&gt; \
+  -e CA_FINGERPRINT=&lt;central-ca-fingerprint&gt; \
+  -e HOST_ID=api-prod-i-0123456789abcdef0 \
+  -e HERALD_NAME=api-prod-i-0123456789abcdef0 \
+  -e HERALD_ID=api-prod-i-0123456789abcdef0 \
+  -e HERALD_CA_ROOT=/agent-data/certs/root_ca.crt \
+  -e HERALD_CERT=/agent-data/certs/agent.crt \
+  -e HERALD_KEY=/agent-data/certs/agent.key \
+  -e TELEMETRY_MODE=hybrid \
+  -e TELEMETRY_QUEUE_MODE=memory \
+  -e TELEMETRY_MEMORY_QUEUE_MB=256 \
+  -e OTEL_SENDING_QUEUE_SIZE=64000 \
+  -e FLB_MEM_BUF_LIMIT=256MB \
+  -e FLB_TAIL_DB_PATH=/dev/shm/flb_monitored.db \
+  -e UPSTREAM_CRITICAL_QUEUE_SIZE=1024 \
+  -e UPSTREAM_TELEMETRY_QUEUE_SIZE=4096 \
+  -e UPSTREAM_CRITICAL_ENQUEUE_TIMEOUT_MS=5000 \
+  -e ENVIRONMENT=production \
+  logforge/unicron-agent:latest</code></pre>
+                        <aside class="article-note">
+                            <p>Do not paste the example above. Paste the real command from your LogForge UI. The enrollment token is single-use and expires after about ten minutes.</p>
+                        </aside>
+                    </section>
+
+                    <section id="ec2">
+                        <h2>Step 4: Run The Agent On EC2</h2>
+                        <p>SSH into the EC2 instance:</p>
+                        <pre><code class="language-sh">ssh ec2-user@ec2-203-0-113-25.compute-1.amazonaws.com</code></pre>
+                        <p>Use the right SSH user for your AMI. For Ubuntu images, that is usually <code>ubuntu</code> instead of <code>ec2-user</code>.</p>
+                        <p>Paste the generated command.</p>
+                        <p>Then check that the agent container is running:</p>
+                        <pre><code class="language-sh">docker ps --filter "name=unicron-agent"</code></pre>
+                        <p>Follow the logs for the first boot:</p>
+                        <pre><code class="language-sh">docker logs -f unicron-agent-api-prod-i-0123456789abcdef0</code></pre>
+                        <p>You are looking for the agent to bootstrap its certificate, register with Central, and begin sending heartbeat and telemetry. After a few seconds, return to <strong>Settings &gt; Agents</strong> in LogForge. The EC2 instance should appear as online. From there, the container inventory and logs should start filling in.</p>
+                    </section>
+
+                    <section id="repeat">
+                        <h2>Step 5: Repeat For Each EC2 Instance</h2>
+                        <p>Generate a fresh command for each EC2 instance.</p>
+                        <p>This matters because each agent gets its own identity. Do not reuse one enrollment command across five servers unless your plan is to create a tiny identity crisis and then debug it with stale coffee.</p>
+                        <p>Good names:</p>
+                        <pre><code class="language-text">api-prod-i-0123456789abcdef0
+worker-prod-i-0fedcba9876543210
+staging-web-i-01112222333344445</code></pre>
+                        <p>Bad names:</p>
+                        <pre><code class="language-text">server
+test
+please-work</code></pre>
+                        <p>You will thank yourself later when an alert says exactly which host is angry.</p>
+                    </section>
+
+                    <section id="security-groups">
+                        <h2>What About EC2 Security Groups?</h2>
+                        <p>For the EC2 agent instances, you usually do <strong>not</strong> need new inbound rules.</p>
+                        <p>The agent connects out to Central and keeps an mTLS WebSocket open. So the EC2 instance needs outbound access to:</p>
+                        <pre><code class="language-text">tcp/9443  -&gt; logforge.example.com</code></pre>
+                        <p>Use your <code>UNICRON_AGENT_MTLS_PORT</code> value if you changed it from the default.</p>
+                        <p>Central-triggered remediation actions do not require inbound access to the EC2 instance. The alert engine calls Central's internal action API. Central resolves the target host and container, then sends <code>container_command_request</code> or <code>run_script</code> through <code>AgentRegistry.send_command</code>. The agent receives that command over its existing WebSocket and uses the local Docker socket to restart, stop, kill, start, or run the script.</p>
+                        <p>The generated agent command publishes <code>24224</code>, <code>9880</code>, <code>4317</code>, and <code>4318</code> on the EC2 host. Those are useful for local Fluent Bit and OTLP inputs. Do not add EC2 inbound security group rules for those ports unless you intentionally want another machine to push logs or telemetry into that agent.</p>
+                        <p>For the Central machine, allow inbound from your EC2 instances to:</p>
+                        <pre><code class="language-text">tcp/9443</code></pre>
+                        <p>Allow inbound to <code>UNICRON_APP_PORT</code>, default <code>8444</code>, only from the browsers or proxies that need to use the dashboard/API.</p>
+                        <p>If you can restrict those rules to your VPC, EC2 security group, VPN CIDR, fixed EC2 egress IPs, or admin IPs, do that. "Open to the world because I am just testing" is how "just testing" becomes a calendar event.</p>
+                    </section>
+
+                    <section id="queue">
+                        <h2>Durable Queue Or Memory Queue?</h2>
+                        <p>For a first install, use <strong>Memory only</strong>.</p>
+                        <p>It is simpler and avoids persistent queue volumes on the EC2 host. If Central goes offline, the agent may drop backlog once its memory queue fills or the container restarts, but the setup is clean.</p>
+                        <p>Use <strong>Durable output queue</strong> when:</p>
+                        <ul>
+                            <li>The EC2 instance is chatty.</li>
+                            <li>Central may go offline for maintenance.</li>
+                            <li>You would rather spend disk to preserve telemetry backlog.</li>
+                        </ul>
+                        <p>In durable mode, LogForge adds extra Docker volumes for the OpenTelemetry and Fluent Bit queues. The generated reinstall command intentionally removes the identity volume for a fresh enrollment, but preserves durable queue volumes.</p>
+                    </section>
+
+                    <section id="troubleshooting">
+                        <h2>Troubleshooting</h2>
+                        <h3>The agent never appears in LogForge.</h3>
+                        <p>Check the token age. Enrollment tokens are short-lived. Generate a fresh command and run that.</p>
+
+                        <h3>The agent logs mention Central connection failures.</h3>
+                        <p>From the EC2 instance, test the required mTLS port:</p>
+                        <pre><code class="language-sh">nc -vz logforge.example.com 9443</code></pre>
+                        <p>If you also want to check the dashboard/API port from that host:</p>
+                        <pre><code class="language-sh">curl -kI https://logforge.example.com:8444/unicron</code></pre>
+                        <p>If the mTLS port fails, it is networking, not LogForge.</p>
+
+                        <h3>The agent says certificate bootstrap or fingerprint validation failed.</h3>
+                        <p>Generate a new enrollment command from the UI and run the whole command, including the <code>docker volume rm ...-data</code> line. That clears stale trust material from an older install.</p>
+
+                        <h3>Docker permission denied.</h3>
+                        <p>Use <code>sudo docker ...</code>, or add your user to the <code>docker</code> group and log in again:</p>
+                        <pre><code class="language-sh">sudo usermod -aG docker "$USER"</code></pre>
+
+                        <h3>Containers are missing.</h3>
+                        <p>The generated command mounts:</p>
+                        <pre><code class="language-text">/var/run/docker.sock
+/var/lib/docker/containers
+/</code></pre>
+                        <p>Those mounts are how the agent sees Docker inventory, container logs, and host metrics. If your EC2 host uses a nonstandard Docker data root, adjust the generated <code>/var/lib/docker/containers</code> mount to match that host.</p>
+                    </section>
+
+                    <section id="why">
+                        <h2>Why This Works</h2>
+                        <p>This guide follows the current public LogForge install path:</p>
+                        <ul>
+                            <li><code>curl -fsSL https://www.logforge.dev/install.sh | sh</code> clones or updates <code>https://github.com/log-forge/logforge.git</code>.</li>
+                            <li>The public repo includes <code>.env</code>, so the default install does not need a hand-written environment file.</li>
+                            <li>The installer starts <code>docker compose -f docker-compose.yml up -d unicron</code>; the manual fallback uses <code>docker compose up -d</code> from the repo root.</li>
+                            <li>Docker Compose runs the appliance as <code>logforge/unicron:latest</code>.</li>
+                            <li><code>UNICRON_APP_PORT</code> publishes the browser/API endpoint, default <code>8444</code>.</li>
+                            <li><code>UNICRON_AGENT_MTLS_PORT</code> publishes agent mTLS enrollment and traffic, default <code>9443</code>.</li>
+                            <li>The installer prints <code>https://localhost:${UNICRON_APP_PORT}/unicron</code>, which is <code>https://localhost:8444/unicron</code> by default.</li>
+                            <li>The backend enrollment endpoint is <code>POST /unicron/api/agent/enroll</code>.</li>
+                            <li>The UI at <strong>Settings &gt; Agents</strong> calls that endpoint and displays the generated <code>docker run</code> command.</li>
+                            <li>The generated command sets <code>CENTRAL_URL</code>, <code>CENTRAL_WS_URL</code>, <code>CENTRAL_MTLS_URL</code>, <code>ENROLL_TOKEN</code>, and <code>CA_FINGERPRINT</code>.</li>
+                            <li>The agent bootstraps its certificate with the one-time token, then registers and streams telemetry over mTLS.</li>
+                        </ul>
+                        <p>That is the nice part: once Central is reachable, the EC2 side is mostly one pasted command per host.</p>
+                        <p>CloudWatch is still there when you need the full AWS-native machinery. But for "show me my Docker hosts and containers without making me write another policy document," LogForge is a very pleasant shortcut.</p>
+                    </section>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 LogForge. Docker alerts, routes, and guarded fixes from your own host.</p>
+        <a href="mailto:logforge@gmail.com">logforge@gmail.com</a>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+
+</html>
