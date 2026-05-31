@@ -47,12 +47,36 @@
 
                 <aside class="blog-hero-panel" aria-label="Blog focus areas">
                     <span class="blog-card-meta">current focus</span>
-                    <p>Kamal-managed Docker hosts, remote agents, plain VMs, persistent state, and keeping observability setup small enough to finish before lunch gets cold.</p>
+                    <p>ECS on EC2, Fargate boundaries, Kamal-managed Docker hosts, remote agents, plain VMs, and keeping observability setup small enough to finish before lunch gets cold.</p>
                 </aside>
             </div>
         </section>
 
         <section class="post-list" aria-label="Blog posts">
+            <a class="post-card" href="monitoring-ecs-fargate-with-logforge.html">
+                <div class="post-card-copy">
+                    <span class="post-meta"><time datetime="2026-05-31">May 31, 2026</time> / guide / ecs fargate</span>
+                    <h2>Monitoring ECS Fargate With LogForge, Without Pretending There Is A Docker Host</h2>
+                    <p>Understand why the EC2 host-agent guide does not apply to pure Fargate, and where AWS task log drivers, FireLens, and Managed Instances fit instead.</p>
+                    <span class="blog-read-more">Read article</span>
+                </div>
+                <figure class="post-card-media" aria-label="LogForge dashboard preview">
+                    <img src="../assets/logforge-home.png" alt="LogForge dashboard showing Docker monitoring views" loading="lazy" />
+                </figure>
+            </a>
+
+            <a class="post-card" href="monitoring-ecs-on-ec2-with-logforge.html">
+                <div class="post-card-copy">
+                    <span class="post-meta"><time datetime="2026-05-31">May 31, 2026</time> / guide / ecs ec2</span>
+                    <h2>Monitoring ECS On EC2 With LogForge, Without Losing The Host Boundary</h2>
+                    <p>Run one LogForge agent per ECS EC2 container instance, keep agents outside application task lifecycles, and avoid reusing enrollment identities across hosts.</p>
+                    <span class="blog-read-more">Read article</span>
+                </div>
+                <figure class="post-card-media" aria-label="LogForge dashboard preview">
+                    <img src="../assets/logforge-home.png" alt="LogForge dashboard showing Docker monitoring views" loading="lazy" />
+                </figure>
+            </a>
+
             <a class="post-card" href="monitoring-vps-docker-hosts-with-logforge.html">
                 <div class="post-card-copy">
                     <span class="post-meta"><time datetime="2026-05-30">May 30, 2026</time> / guide / vps</span>

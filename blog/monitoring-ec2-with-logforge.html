@@ -84,6 +84,7 @@ docker compose up -d</code></pre>
                         <strong>On this page</strong>
                         <ol>
                             <li><a href="#shape">Setup shape</a></li>
+                            <li><a href="#ecs">ECS note</a></li>
                             <li><a href="#needs">What you need</a></li>
                             <li><a href="#central">Start Central</a></li>
                             <li><a href="#reachability">Check reachability</a></li>
@@ -149,6 +150,12 @@ docker compose up -d</code></pre>
                         <p>For the rest of this guide, I will use:</p>
                         <pre><code class="language-text">logforge.example.com</code></pre>
                         <p>Replace it with your real DNS name or reachable tunnel hostname.</p>
+                    </section>
+
+                    <section id="ecs">
+                        <h2>Does This Apply To ECS?</h2>
+                        <p>It applies to ECS when your ECS tasks run on EC2 container instances that you manage. In that setup, install one LogForge agent per ECS container instance, not one per ECS task. The ECS-specific guide is here: <a href="monitoring-ecs-on-ec2-with-logforge.html">Monitoring ECS On EC2 With LogForge</a>.</p>
+                        <p>It does not apply to pure ECS Fargate, because Fargate does not expose the Docker host boundary that the LogForge remote agent needs. The Fargate boundary guide is here: <a href="monitoring-ecs-fargate-with-logforge.html">Monitoring ECS Fargate With LogForge</a>.</p>
                     </section>
 
                     <section id="needs">
