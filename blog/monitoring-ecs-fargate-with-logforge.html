@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Understand where LogForge fits with ECS Fargate, AWS task log drivers, and ECS Managed Instances." />
+    <title>Monitoring ECS Fargate With LogForge - LogForge Blog</title>
+    <link rel="canonical" href="https://www.logforge.dev/blog/monitoring-ecs-fargate-with-logforge.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="icon" href="../assets/logo-32x32.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../styles.css" />
+</head>
+
+<body class="blog-page">
+    <div class="page-grid" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="LogForge home">
+            <img src="../assets/logforge-Icon-transparent-512x512.png" alt="" />
+            <span>LogForge</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="../#flow">Live flow</a>
+            <a href="../#incident">Incident delta</a>
+            <a href="../#compare">Compare</a>
+            <a href="../#templates">Templates</a>
+            <a href="./" aria-current="page">Blog</a>
+            <a href="../#premium">Premium</a>
+            <a href="../#install">Install</a>
+        </nav>
+
+        <a class="header-cta" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </header>
+
+    <main class="article-shell">
+        <article>
+            <header class="article-hero">
+                <div class="article-hero-copy">
+                    <p class="mono-label">// blog.guide.ecs.fargate</p>
+                    <h1>Monitoring ECS Fargate With LogForge, Without Pretending There Is A Docker Host</h1>
+                    <p class="article-dek">Fargate is the ECS option where AWS manages the compute. That is useful, but it also means the EC2 host-agent guide is not the right fit.</p>
+                    <p class="article-meta"><time datetime="2026-05-31">May 31, 2026</time> / ecs / fargate</p>
+                </div>
+
+                <aside class="article-hero-panel article-install-panel" aria-label="LogForge ECS Fargate boundary">
+                    <span class="blog-card-meta">current boundary</span>
+                    <div class="article-install-options">
+                        <div class="article-install-option">
+                            <strong>Fargate gives you</strong>
+                            <pre><code>tasks
+task log drivers
+managed compute</code></pre>
+                        </div>
+                        <div class="article-install-option">
+                            <strong>Fargate does not give you</strong>
+                            <pre><code>Docker socket
+host bind mounts
+host-level agent control</code></pre>
+                        </div>
+                    </div>
+                    <dl class="article-port-grid article-port-grid--compact">
+                        <div>
+                            <dt>EC2</dt>
+                            <dd>Use LogForge host agents</dd>
+                        </div>
+                        <div>
+                            <dt>Fargate</dt>
+                            <dd>Use task log routing</dd>
+                        </div>
+                    </dl>
+                </aside>
+            </header>
+
+            <div class="article-layout">
+                <aside class="article-sidebar" aria-label="Article navigation">
+                    <div class="article-side-card">
+                        <strong>Scenario</strong>
+                        <p>Your ECS service runs on Fargate, and you want to know whether the EC2 LogForge agent guide applies.</p>
+                    </div>
+                    <nav class="article-toc" aria-label="On this page">
+                        <strong>On this page</strong>
+                        <ol>
+                            <li><a href="#answer">Short answer</a></li>
+                            <li><a href="#why">Why it differs</a></li>
+                            <li><a href="#logs">What works today</a></li>
+                            <li><a href="#managed-instances">Managed Instances</a></li>
+                            <li><a href="#decision-table">Decision table</a></li>
+                            <li><a href="#references">AWS references</a></li>
+                        </ol>
+                    </nav>
+                </aside>
+
+                <div class="article-prose">
+                    <section id="answer">
+                        <h2>Short Answer</h2>
+                        <p>No, the EC2 host-agent blog does not apply to pure ECS Fargate.</p>
+                        <p>That is not a networking issue and it is not an IAM issue. It is a host-boundary issue. The current LogForge remote agent is designed for Docker hosts where it can mount the Docker socket, read container log files, watch host metrics, and perform guarded local container actions.</p>
+                        <p>Fargate is specifically the ECS option where you do not manage those hosts. AWS describes Fargate capacity as serverless compute managed by ECS in its <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html" target="_blank" rel="noopener noreferrer">launch type and capacity provider docs</a>.</p>
+                    </section>
+
+                    <section id="why">
+                        <h2>Why It Differs</h2>
+                        <p>The EC2 guide works because the agent runs beside the application containers on a host you control:</p>
+                        <pre><code class="language-text">Docker host
+  /var/run/docker.sock
+  /var/lib/docker/containers
+  LogForge agent
+  application containers</code></pre>
+                        <p>Fargate removes that host from your operational surface. You define task definitions, services, networking, CPU, memory, and log drivers, but you do not get a place to run a privileged host agent or mount host paths.</p>
+                        <p>So the LogForge features that depend on local Docker access do not transfer directly: host-level container inventory, Docker event watching, raw container log file tailing, and Central-triggered Docker restart or stop actions.</p>
+                    </section>
+
+                    <section id="logs">
+                        <h2>What Works Today</h2>
+                        <p>For Fargate, use the logging paths ECS supports at the task definition level. AWS documents container logging through log drivers, and notes that Fargate supports a subset that includes <code>awslogs</code>, <code>splunk</code>, and <code>awsfirelens</code> in its <a href="https://docs.aws.amazon.com/prescriptive-guidance/latest/implementing-logging-monitoring-cloudwatch/ec2-fargate-logs.html" target="_blank" rel="noopener noreferrer">ECS container logs guidance</a>.</p>
+                        <p>That means a practical Fargate setup usually looks like this:</p>
+                        <pre><code class="language-text">Fargate task stdout/stderr
+  ---&gt; awslogs or awsfirelens
+  ---&gt; CloudWatch Logs, FireLens destination, or another supported sink</code></pre>
+                        <p>Do not publish the LogForge agent's local input ports and treat that as Fargate support. Those ports belong to an agent running on a host. Fargate tasks need a documented network ingestion path, not a pretend local Docker host.</p>
+                    </section>
+
+                    <section id="managed-instances">
+                        <h2>What About ECS Managed Instances?</h2>
+                        <p>ECS Managed Instances are not Fargate. They give AWS more responsibility for the EC2-backed compute, and AWS has a Managed Daemons feature for running software agents across those instances.</p>
+                        <p>That is promising for host agents, but it is not the same as the current EC2 copy-paste guide. A LogForge setup there would need a tested daemon task definition, host bind mounts, and a clean per-instance enrollment flow. Until that exists as a documented LogForge path, treat Managed Instances as advanced or future work rather than saying the EC2 blog applies unchanged.</p>
+                        <p>AWS documents Managed Daemons as a way to deploy one daemon task on every instance in associated Managed Instances capacity providers in its <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/managed-daemons.html" target="_blank" rel="noopener noreferrer">ECS Managed Daemons guide</a>.</p>
+                    </section>
+
+                    <section id="decision-table">
+                        <h2>Decision Table</h2>
+                        <div class="article-table-wrap" role="region" aria-label="LogForge ECS fit by compute type" tabindex="0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">ECS compute</th>
+                                        <th scope="col">LogForge host-agent fit</th>
+                                        <th scope="col">Use this path</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>EC2 launch type or EC2 Auto Scaling group capacity provider</td>
+                                        <td>Yes</td>
+                                        <td><a href="monitoring-ecs-on-ec2-with-logforge.html">One LogForge agent per ECS container instance</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Fargate or Fargate Spot</td>
+                                        <td>No</td>
+                                        <td>Use ECS task log drivers such as <code>awslogs</code> or <code>awsfirelens</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td>ECS Managed Instances</td>
+                                        <td>Not the current copy-paste path</td>
+                                        <td>Evaluate a dedicated daemon task and enrollment design before publishing support</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section id="references">
+                        <h2>AWS References</h2>
+                        <ul>
+                            <li><a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html" target="_blank" rel="noopener noreferrer">ECS launch types and capacity providers</a></li>
+                            <li><a href="https://docs.aws.amazon.com/prescriptive-guidance/latest/implementing-logging-monitoring-cloudwatch/ec2-fargate-logs.html" target="_blank" rel="noopener noreferrer">ECS container logs for EC2 and Fargate launch types</a></li>
+                            <li><a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/managed-daemons.html" target="_blank" rel="noopener noreferrer">ECS Managed Daemons</a></li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 LogForge. Docker alerts, routes, and guarded fixes from your own host.</p>
+        <a href="mailto:logforge@gmail.com">logforge@gmail.com</a>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+
+</html>

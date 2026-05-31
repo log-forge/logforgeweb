@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Monitor ECS clusters that run on EC2 capacity with one LogForge remote agent per ECS container instance." />
+    <title>Monitoring ECS On EC2 With LogForge - LogForge Blog</title>
+    <link rel="canonical" href="https://www.logforge.dev/blog/monitoring-ecs-on-ec2-with-logforge.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="icon" href="../assets/logo-32x32.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../styles.css" />
+</head>
+
+<body class="blog-page">
+    <div class="page-grid" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="LogForge home">
+            <img src="../assets/logforge-Icon-transparent-512x512.png" alt="" />
+            <span>LogForge</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="../#flow">Live flow</a>
+            <a href="../#incident">Incident delta</a>
+            <a href="../#compare">Compare</a>
+            <a href="../#templates">Templates</a>
+            <a href="./" aria-current="page">Blog</a>
+            <a href="../#premium">Premium</a>
+            <a href="../#install">Install</a>
+        </nav>
+
+        <a class="header-cta" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </header>
+
+    <main class="article-shell">
+        <article>
+            <header class="article-hero">
+                <div class="article-hero-copy">
+                    <p class="mono-label">// blog.guide.ecs.ec2</p>
+                    <h1>Monitoring ECS On EC2 With LogForge, Without Losing The Host Boundary</h1>
+                    <p class="article-dek">If your ECS cluster runs tasks on EC2 container instances, use the same LogForge shape as any other Docker host: one Central, one outbound agent per host.</p>
+                    <p class="article-meta"><time datetime="2026-05-31">May 31, 2026</time> / ecs / ec2 capacity</p>
+                </div>
+
+                <aside class="article-hero-panel article-install-panel" aria-label="LogForge ECS on EC2 monitoring shape">
+                    <span class="blog-card-meta">supported shape</span>
+                    <div class="article-install-options">
+                        <div class="article-install-option">
+                            <strong>Host boundary</strong>
+                            <pre><code>ECS tasks
+LogForge agent
+same EC2 container instance</code></pre>
+                        </div>
+                        <div class="article-install-option">
+                            <strong>Network path</strong>
+                            <pre><code>ECS container instance  ---&gt;  Central :9443</code></pre>
+                        </div>
+                    </div>
+                    <dl class="article-port-grid article-port-grid--compact">
+                        <div>
+                            <dt>9443</dt>
+                            <dd>Agent mTLS from container instances</dd>
+                        </div>
+                        <div>
+                            <dt>8444</dt>
+                            <dd>Dashboard/API for admins</dd>
+                        </div>
+                    </dl>
+                </aside>
+            </header>
+
+            <div class="article-layout">
+                <aside class="article-sidebar" aria-label="Article navigation">
+                    <div class="article-side-card">
+                        <strong>Scenario</strong>
+                        <p>Your ECS services run on EC2 or an EC2 Auto Scaling group capacity provider, and you want host-level Docker inventory, logs, metrics, and guarded actions.</p>
+                    </div>
+                    <nav class="article-toc" aria-label="On this page">
+                        <strong>On this page</strong>
+                        <ol>
+                            <li><a href="#answer">Short answer</a></li>
+                            <li><a href="#shape">Setup shape</a></li>
+                            <li><a href="#install">Install pattern</a></li>
+                            <li><a href="#autoscaling">Autoscaling notes</a></li>
+                            <li><a href="#security">Security groups</a></li>
+                            <li><a href="#verify">Verify coverage</a></li>
+                            <li><a href="#fargate">Not Fargate</a></li>
+                            <li><a href="#troubleshooting">Troubleshooting</a></li>
+                        </ol>
+                    </nav>
+                </aside>
+
+                <div class="article-prose">
+                    <section id="answer">
+                        <h2>Short Answer</h2>
+                        <p>Yes, the EC2 LogForge pattern applies to ECS when your ECS tasks run on EC2 container instances that you manage.</p>
+                        <p>The LogForge agent cares about the host boundary. It needs the local Docker socket, container log directory, and host filesystem view. ECS on EC2 still has those things because your tasks are running on EC2 instances registered into an ECS cluster.</p>
+                        <p>AWS now describes ECS capacity in terms of launch types and capacity providers. The important distinction for LogForge is simple: EC2 and EC2 Auto Scaling group capacity providers give you a host you can enroll; pure Fargate does not. AWS covers those compute choices in its <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html" target="_blank" rel="noopener noreferrer">ECS launch type and capacity provider docs</a>.</p>
+                    </section>
+
+                    <section id="shape">
+                        <h2>The Shape Of The Setup</h2>
+                        <p>Keep the unit of monitoring as the ECS container instance, not the ECS service, task, or container.</p>
+                        <pre><code class="language-text">ECS service task
+ECS service task  ---&gt;  EC2 container instance  ---&gt;  LogForge Central :9443
+ECS service task        LogForge agent</code></pre>
+                        <p>That means:</p>
+                        <ul>
+                            <li>One LogForge Central for the fleet.</li>
+                            <li>One LogForge agent on each active ECS EC2 container instance.</li>
+                            <li>No LogForge agent inside every application task.</li>
+                            <li>No inbound LogForge management port required on the ECS hosts.</li>
+                        </ul>
+                        <p>The LogForge agent is separate from the Amazon ECS container agent. The ECS agent registers the instance into the ECS cluster. The LogForge agent observes the local Docker host and sends telemetry to LogForge Central.</p>
+                    </section>
+
+                    <section id="install">
+                        <h2>Install Pattern</h2>
+                        <p>For a first install, use the same flow as the EC2 guide, but run it on each ECS container instance.</p>
+                        <ol>
+                            <li>Start LogForge Central somewhere stable and reachable.</li>
+                            <li>Open <strong>Settings &gt; Agents</strong> in LogForge.</li>
+                            <li>Generate a unique enrollment command for one ECS container instance.</li>
+                            <li>Connect to that EC2 host with SSH or AWS Systems Manager Session Manager.</li>
+                            <li>Run the generated command on the host.</li>
+                            <li>Repeat for each active ECS container instance.</li>
+                        </ol>
+                        <p>The generated command should still include these host mounts:</p>
+                        <pre><code class="language-text">/var/run/docker.sock
+/var/lib/docker/containers
+/</code></pre>
+                        <p>Those mounts are what let the agent see Docker inventory, container logs, host metrics, and local remediation targets.</p>
+                        <aside class="article-note">
+                            <p>Do not paste one generated enrollment command into an Auto Scaling launch template. LogForge enrollment tokens are single-use and short-lived, and every host should get its own agent identity.</p>
+                        </aside>
+                    </section>
+
+                    <section id="autoscaling">
+                        <h2>Autoscaling Notes</h2>
+                        <p>ECS on EC2 often means an Auto Scaling group, capacity provider, or instance refresh will replace hosts over time. When an EC2 container instance disappears, its LogForge agent disappears with it. The replacement host needs its own enrollment.</p>
+                        <p>For small or mostly steady clusters, manual enrollment per current container instance is fine. For elastic clusters, plan the enrollment lifecycle before treating coverage as automatic. The clean model is still one agent per host, but automation needs a way to mint a fresh identity for each new instance.</p>
+                        <p>ECS also has a <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_service-options.html" target="_blank" rel="noopener noreferrer">DAEMON scheduling strategy</a> that places one task on each active container instance. That shape maps well to host agents, but the current public LogForge UI emits a Docker run command with a unique enrollment token. Treat an ECS daemon-service version as an advanced conversion that needs a tested task definition, host bind mounts, and unique enrollment handling.</p>
+                    </section>
+
+                    <section id="security">
+                        <h2>Security Groups</h2>
+                        <p>For ECS container instances, the LogForge rule is the same as plain EC2: the agent connects out to Central and keeps an mTLS WebSocket open.</p>
+                        <pre><code class="language-text">ECS container instance  ---&gt;  tcp/9443  ---&gt;  LogForge Central</code></pre>
+                        <p>You usually do not need new inbound security group rules on the ECS hosts for LogForge. Central needs inbound <code>9443/tcp</code> from those hosts or their NAT/VPC path. Keep the dashboard/API port, default <code>8444</code>, limited to admins, a VPN, a private mesh, or a trusted proxy.</p>
+                        <p>The generated agent command may publish local input ports such as <code>24224</code>, <code>9880</code>, <code>4317</code>, and <code>4318</code>. Do not open those in the ECS host security group unless another machine is intentionally sending telemetry to the agent.</p>
+                    </section>
+
+                    <section id="verify">
+                        <h2>Verify Coverage</h2>
+                        <p>On an ECS container instance, confirm the LogForge agent container is running:</p>
+                        <pre><code class="language-sh">docker ps --filter "name=unicron-agent"</code></pre>
+                        <p>Then confirm the agent can reach Central:</p>
+                        <pre><code class="language-sh">nc -vz logforge.example.com 9443</code></pre>
+                        <p>In LogForge, the agent should appear under <strong>Settings &gt; Agents</strong>. Container inventory should include ECS task containers from that host, and host metrics should update even when ECS replaces an application task.</p>
+                    </section>
+
+                    <section id="fargate">
+                        <h2>This Is Not The Fargate Path</h2>
+                        <p>This setup applies when ECS gives you an EC2 host boundary. It does not apply to pure ECS Fargate, because Fargate does not give you a Docker host where you can run a privileged host agent and mount the Docker socket.</p>
+                        <p>If your service is on Fargate, use the <a href="monitoring-ecs-fargate-with-logforge.html">Fargate boundary guide</a> instead. If you need LogForge's host-level container inventory and guarded Docker actions, run that workload on ECS EC2 capacity or another Docker host you control.</p>
+                    </section>
+
+                    <section id="troubleshooting">
+                        <h2>Troubleshooting</h2>
+                        <h3>The agent is online, but app logs are missing.</h3>
+                        <p>Check the ECS task definition log driver. If the task uses <code>awslogs</code>, <code>awsfirelens</code>, or another non-default driver, stdout may be shipped through that driver instead of remaining available as Docker JSON log files on the host. Host metrics, container inventory, and Docker events can still work while app log visibility depends on the task's logging configuration.</p>
+
+                        <h3>A new ECS instance appeared without a LogForge agent.</h3>
+                        <p>That instance was probably launched by the Auto Scaling group or capacity provider after your manual enrollment pass. Generate a fresh enrollment command for the new host, then decide whether you need a real bootstrap automation path.</p>
+
+                        <h3>Several ECS hosts show up as one agent.</h3>
+                        <p>Do not reuse enrollment commands. Generate one command per container instance so every host has its own certificate, name, and identity.</p>
+
+                        <h3>Containers are missing.</h3>
+                        <p>Confirm the agent command mounted the Docker socket, Docker container log directory, and host root. If your ECS AMI uses a nonstandard Docker data root, adjust the <code>/var/lib/docker/containers</code> mount to match the host.</p>
+                    </section>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 LogForge. Docker alerts, routes, and guarded fixes from your own host.</p>
+        <a href="mailto:logforge@gmail.com">logforge@gmail.com</a>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+
+</html>
