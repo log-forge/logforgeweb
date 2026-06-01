@@ -68,7 +68,7 @@
                         <span class="cirdan-graph-line cirdan-line-four"></span>
                         <span class="cirdan-graph-line cirdan-line-five"></span>
                         <span class="cirdan-graph-line cirdan-line-six"></span>
-                        <span class="cirdan-graph-node cirdan-node-center">operational graph</span>
+                        <span class="cirdan-graph-node cirdan-node-center">CIRDAN</span>
                         <span class="cirdan-graph-node cirdan-node-logs">logs</span>
                         <span class="cirdan-graph-node cirdan-node-metrics">metrics</span>
                         <span class="cirdan-graph-node cirdan-node-traces">traces</span>
@@ -157,43 +157,134 @@
 
         <section id="knowledge" class="section cirdan-section" aria-labelledby="knowledge-title">
             <div class="section-intro">
-                <p class="mono-label">// graph.knowledge.layer</p>
-                <h2 id="knowledge-title">The graph connects signals, runtime state, and the systems they describe.</h2>
-                <p>As operational data is consumed, Cirdan updates graph-based system knowledge across container platforms, hosts, services, workloads, and enterprise systems. The point is not to store more noise. It is to preserve the relationships agents need to reason over infrastructure.</p>
+                <p class="mono-label">// agent-native.observability</p>
+                <h2 id="knowledge-title">Built for AI agents, not human operators.</h2>
+                <p>Traditional observability was built for human operators: dashboards, charts, log streams, and manual context-building. Cirdan keeps that evidence available, then reshapes it into context an agent can read, cite, and reason across while systems are live.</p>
             </div>
 
-            <div class="cirdan-knowledge-layout">
-                <div class="cirdan-source-panel">
-                    <div class="panel-heading">
-                        <span>// sources</span>
-                        <strong>consumed</strong>
-                    </div>
-                    <div class="cirdan-source-pills" aria-label="Cirdan source signals">
-                        <span>logs</span>
-                        <span>metrics</span>
-                        <span>traces</span>
-                        <span>events</span>
-                        <span>alerts</span>
-                        <span>configs</span>
-                        <span>live state</span>
-                    </div>
+            <div class="cirdan-agent-shift-console" aria-label="Human dashboard to agent context interface">
+                <div class="window-bar">
+                    <span class="window-dot"></span>
+                    <span class="window-dot"></span>
+                    <span class="window-dot"></span>
+                    <span class="window-title">logforge://cirdan/human-to-agent</span>
+                    <span class="window-status">context</span>
                 </div>
 
-                <div class="cirdan-source-panel">
+                <div class="cirdan-agent-shift-body">
+                    <article class="cirdan-shift-panel cirdan-human-panel">
+                        <div class="panel-heading">
+                            <span>// human.dashboard</span>
+                            <strong>fragments</strong>
+                        </div>
+                        <div class="cirdan-shift-panel-content">
+                            <div class="cirdan-shift-copy">
+                                <h3>Human-oriented observability</h3>
+                                <p>Dashboards, charts, alerts, and logs expose slices of state. The operator still has to stitch them into incident context.</p>
+                            </div>
+
+                            <div class="cirdan-dashboard-fragments" aria-label="Human observability fragments">
+                                <div class="cirdan-dashboard-fragment">
+                                    <span class="cirdan-fragment-label">charts</span>
+                                    <div class="cirdan-mini-chart" aria-hidden="true">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                                <div class="cirdan-dashboard-fragment cirdan-alert-fragment">
+                                    <span class="cirdan-fragment-label">alerts</span>
+                                    <p>api p95 high</p>
+                                    <p>queue lag rising</p>
+                                </div>
+                                <div class="cirdan-dashboard-fragment cirdan-log-fragment">
+                                    <span class="cirdan-fragment-label">logs</span>
+                                    <p>checkout timeout</p>
+                                    <p>retry budget hit</p>
+                                </div>
+                                <div class="cirdan-dashboard-fragment cirdan-config-fragment">
+                                    <span class="cirdan-fragment-label">configs</span>
+                                    <p>rule: page after 5m</p>
+                                    <p>deploy: payments:v42</p>
+                                </div>
+                            </div>
+
+                            <div class="cirdan-source-chips" aria-label="Human-facing source types">
+                                <span>dashboards</span>
+                                <span>alerts</span>
+                                <span>logs</span>
+                                <span>configs</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <div class="cirdan-agent-connector" aria-label="The interface is moving from human eyes to agent perception">
+                        <span class="cirdan-connector-node">human eyes</span>
+                        <span class="cirdan-connector-line"></span>
+                        <span class="cirdan-connector-node cirdan-connector-node-agent">agent perception</span>
+                    </div>
+
+                    <article class="cirdan-shift-panel cirdan-context-panel">
+                        <div class="panel-heading">
+                            <span>// cirdan.context</span>
+                            <strong>agent-ready</strong>
+                        </div>
+                        <div class="cirdan-shift-panel-content">
+                            <div class="cirdan-shift-copy">
+                                <h3>Cirdan</h3>
+                                <p>Cirdan turns observability into agent infrastructure: a living context layer agents can inspect, connect, cite, and use to prepare approved action.</p>
+                            </div>
+
+                            <div class="cirdan-context-layer" aria-label="Agent-readable context layer">
+                                <div class="cirdan-context-map" aria-hidden="true">
+                                    <span class="cirdan-context-link cirdan-context-link-one"></span>
+                                    <span class="cirdan-context-link cirdan-context-link-two"></span>
+                                    <span class="cirdan-context-link cirdan-context-link-three"></span>
+                                    <span class="cirdan-context-node cirdan-context-node-core">context</span>
+                                    <span class="cirdan-context-node cirdan-context-node-logs">logs</span>
+                                    <span class="cirdan-context-node cirdan-context-node-alert">alert</span>
+                                    <span class="cirdan-context-node cirdan-context-node-config">config</span>
+                                </div>
+
+                                <div class="cirdan-agent-readouts">
+                                    <div>
+                                        <span>connected.signals</span>
+                                        <strong>service + workload + alert</strong>
+                                    </div>
+                                    <div>
+                                        <span>citations</span>
+                                        <strong>logs, deploy, rule state</strong>
+                                    </div>
+                                    <div>
+                                        <span>action.prep</span>
+                                        <strong>approval required</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cirdan-source-chips cirdan-context-chips" aria-label="Agent-facing context capabilities">
+                                <span>inspect</span>
+                                <span>connect</span>
+                                <span>cite</span>
+                                <span>prepare</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="cirdan-console-readout cirdan-agent-shift-readout">
                     <div class="panel-heading">
-                        <span>// scope</span>
-                        <strong>modeled</strong>
+                        <span>// context.pipeline</span>
+                        <strong>operator governed</strong>
                     </div>
-                    <div class="cirdan-source-pills" aria-label="Cirdan infrastructure scope">
-                        <span>Docker</span>
-                        <span>Kubernetes</span>
-                        <span>Podman</span>
-                        <span>Swarm</span>
-                        <span>hosts</span>
-                        <span>services</span>
-                        <span>workloads</span>
-                        <span>enterprise systems</span>
-                    </div>
+                    <ol>
+                        <li><span>inspect</span> read current state and evidence</li>
+                        <li><span>connect</span> preserve service relationships</li>
+                        <li><span>cite</span> keep answers grounded in sources</li>
+                        <li><span>prepare</span> stage scoped action for approval</li>
+                    </ol>
                 </div>
             </div>
         </section>

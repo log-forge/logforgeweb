@@ -149,7 +149,11 @@ code,
 .cirdan-graph-node,
 .cirdan-console-readout,
 .cirdan-capability-card span,
-.cirdan-source-pills,
+.cirdan-source-chips,
+.cirdan-fragment-label,
+.cirdan-agent-connector,
+.cirdan-context-node,
+.cirdan-agent-readouts,
 .cirdan-mode-tag,
 .cirdan-layer-label {
     font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -2888,7 +2892,6 @@ code {
 .cirdan-capability-card,
 .cirdan-mode-grid article,
 .cirdan-compare-grid article,
-.cirdan-source-panel,
 .cirdan-stack-layer {
     min-width: 0;
     border: 1px solid var(--line);
@@ -2994,33 +2997,373 @@ code {
     background: var(--red);
 }
 
-.cirdan-knowledge-layout {
+.cirdan-agent-shift-console {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background:
+        linear-gradient(135deg, rgba(243, 97, 20, 0.09), transparent 28%),
+        linear-gradient(135deg, transparent 54%, rgba(94, 183, 232, 0.1)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.012)),
+        #06101a;
+    box-shadow: var(--shadow);
+}
+
+.cirdan-agent-shift-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(104px, 0.28fr) minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: stretch;
+    padding: 0.8rem;
+}
+
+.cirdan-shift-panel {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent),
+        rgba(4, 10, 16, 0.82);
+}
+
+.cirdan-human-panel {
+    border-color: rgba(243, 97, 20, 0.3);
+    background:
+        linear-gradient(135deg, rgba(243, 97, 20, 0.09), transparent 48%),
+        rgba(4, 10, 16, 0.84);
+}
+
+.cirdan-context-panel {
+    border-color: rgba(94, 183, 232, 0.34);
+    background:
+        linear-gradient(135deg, rgba(94, 183, 232, 0.1), transparent 48%),
+        rgba(4, 10, 16, 0.86);
+}
+
+.cirdan-shift-panel-content {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 0.85rem;
+    min-height: 440px;
+    padding: 0.85rem;
+}
+
+.cirdan-shift-copy h3 {
+    max-width: 16ch;
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.78rem;
+    line-height: 1.08;
+}
+
+.cirdan-shift-copy p {
+    max-width: 38rem;
+    margin: 0.72rem 0 0;
+    color: #c8d6e0;
+    line-height: 1.62;
+}
+
+.cirdan-dashboard-fragments {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+    gap: 0.55rem;
+    min-width: 0;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-.cirdan-source-panel {
+.cirdan-dashboard-fragment {
+    display: grid;
+    align-content: space-between;
+    gap: 0.48rem;
+    min-width: 0;
+    min-height: 104px;
+    padding: 0.58rem;
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 6px;
+    background:
+        linear-gradient(rgba(194, 226, 246, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(194, 226, 246, 0.035) 1px, transparent 1px),
+        rgba(4, 8, 13, 0.66);
+    background-size: 18px 18px, 18px 18px, auto;
 }
 
-.cirdan-source-pills {
+.cirdan-fragment-label {
+    color: var(--brand-orange-light);
+    font-size: 0.67rem;
+    font-weight: 700;
+    text-transform: lowercase;
+}
+
+.cirdan-dashboard-fragment p {
+    margin: 0;
+    overflow: hidden;
+    color: #cbd7df;
+    font-size: 0.68rem;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cirdan-mini-chart {
+    display: flex;
+    align-items: end;
+    gap: 0.28rem;
+    min-width: 0;
+    height: 54px;
+    padding-top: 0.1rem;
+}
+
+.cirdan-mini-chart span {
+    flex: 1;
+    min-width: 0;
+    border-radius: 2px 2px 0 0;
+    background: linear-gradient(180deg, rgba(243, 97, 20, 0.88), rgba(243, 97, 20, 0.24));
+    box-shadow: 0 0 14px rgba(243, 97, 20, 0.12);
+}
+
+.cirdan-mini-chart span:nth-child(1) {
+    height: 38%;
+}
+
+.cirdan-mini-chart span:nth-child(2) {
+    height: 64%;
+}
+
+.cirdan-mini-chart span:nth-child(3) {
+    height: 46%;
+}
+
+.cirdan-mini-chart span:nth-child(4) {
+    height: 82%;
+}
+
+.cirdan-mini-chart span:nth-child(5) {
+    height: 58%;
+}
+
+.cirdan-alert-fragment {
+    border-color: rgba(255, 93, 93, 0.16);
+}
+
+.cirdan-log-fragment,
+.cirdan-config-fragment {
+    border-color: rgba(243, 97, 20, 0.16);
+}
+
+.cirdan-source-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.52rem;
-    padding: 1rem;
+    gap: 0.4rem;
+    min-width: 0;
 }
 
-.cirdan-source-pills span {
+.cirdan-source-chips span {
     max-width: 100%;
-    padding: 0.44rem 0.58rem;
-    border: 1px solid rgba(94, 183, 232, 0.2);
-    border-radius: 999px;
-    background: rgba(94, 183, 232, 0.07);
-    color: #d8edf9;
-    font-size: 0.74rem;
+    padding: 0.34rem 0.48rem;
+    overflow: hidden;
+    border: 1px solid rgba(243, 97, 20, 0.26);
+    border-radius: 6px;
+    background: rgba(243, 97, 20, 0.08);
+    color: #ffd8bd;
+    font-size: 0.66rem;
     font-weight: 700;
+    line-height: 1;
+    text-overflow: ellipsis;
+    text-transform: lowercase;
+    white-space: nowrap;
+}
+
+.cirdan-agent-connector {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 0.62rem;
+    align-items: center;
+    justify-items: center;
+    min-width: 0;
+    padding: 0.2rem 0;
+    color: #d7e8f2;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+    text-transform: lowercase;
+}
+
+.cirdan-connector-node {
+    display: block;
+    max-width: 100%;
+    padding: 0.42rem 0.48rem;
+    overflow: hidden;
+    border: 1px solid rgba(243, 97, 20, 0.28);
+    border-radius: 6px;
+    background: rgba(4, 8, 13, 0.92);
+    color: #ffe1c8;
+    text-overflow: ellipsis;
+}
+
+.cirdan-connector-node-agent {
+    border-color: rgba(94, 183, 232, 0.34);
+    color: #d5f0ff;
+}
+
+.cirdan-connector-line {
+    width: 1px;
+    min-height: 248px;
+    background: linear-gradient(180deg, rgba(243, 97, 20, 0.58), rgba(94, 183, 232, 0.62));
+    box-shadow:
+        0 0 18px rgba(243, 97, 20, 0.16),
+        0 0 22px rgba(94, 183, 232, 0.16);
+}
+
+.cirdan-context-layer {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 0.55rem;
+    align-items: stretch;
+    min-width: 0;
+}
+
+.cirdan-context-map {
+    position: relative;
+    min-width: 0;
+    min-height: 214px;
+    overflow: hidden;
+    border: 1px solid rgba(94, 183, 232, 0.18);
+    border-radius: 6px;
+    background:
+        linear-gradient(rgba(194, 226, 246, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(194, 226, 246, 0.035) 1px, transparent 1px),
+        radial-gradient(circle at 50% 48%, rgba(94, 183, 232, 0.16), transparent 8rem),
+        rgba(4, 8, 13, 0.72);
+    background-size: 22px 22px, 22px 22px, auto, auto;
+}
+
+.cirdan-context-link {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    width: 38%;
+    height: 1px;
+    transform-origin: left center;
+    background: linear-gradient(90deg, rgba(94, 183, 232, 0.6), transparent);
+}
+
+.cirdan-context-link-one {
+    transform: rotate(-34deg);
+}
+
+.cirdan-context-link-two {
+    transform: rotate(15deg);
+}
+
+.cirdan-context-link-three {
+    transform: rotate(128deg);
+}
+
+.cirdan-context-node {
+    position: absolute;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    max-width: 8rem;
+    padding: 0.42rem 0.52rem;
+    overflow: hidden;
+    border: 1px solid rgba(94, 183, 232, 0.34);
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, rgba(8, 17, 26, 0.94), rgba(8, 17, 26, 0.76)),
+        rgba(94, 183, 232, 0.12);
+    color: #d5f0ff;
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-align: center;
+    text-overflow: ellipsis;
+    text-transform: lowercase;
+    white-space: nowrap;
+}
+
+.cirdan-context-node-core {
+    top: 50%;
+    left: 50%;
+    border-color: rgba(243, 97, 20, 0.42);
+    color: #ffe1c8;
+    box-shadow: 0 0 22px rgba(243, 97, 20, 0.16);
+}
+
+.cirdan-context-node-logs {
+    top: 26%;
+    left: 25%;
+}
+
+.cirdan-context-node-alert {
+    top: 40%;
+    left: 76%;
+}
+
+.cirdan-context-node-config {
+    top: 75%;
+    left: 32%;
+}
+
+.cirdan-agent-readouts {
+    display: grid;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+.cirdan-agent-readouts div {
+    min-width: 0;
+    padding: 0.55rem;
+    border: 1px solid rgba(94, 183, 232, 0.16);
+    border-radius: 6px;
+    background: rgba(4, 8, 13, 0.68);
+}
+
+.cirdan-agent-readouts span {
+    display: block;
+    color: var(--brand-blue);
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: lowercase;
+}
+
+.cirdan-agent-readouts strong {
+    display: block;
+    margin-top: 0.34rem;
+    color: #d7e8f2;
+    font-size: 0.76rem;
+    line-height: 1.35;
     overflow-wrap: anywhere;
+}
+
+.cirdan-context-chips span {
+    border-color: rgba(94, 183, 232, 0.3);
+    background: rgba(94, 183, 232, 0.08);
+    color: #d5f0ff;
+}
+
+.cirdan-agent-shift-readout {
+    margin: 0 0.8rem 0.8rem;
+}
+
+.cirdan-agent-shift-readout ol {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.55rem;
+    padding: 0.75rem;
+}
+
+.cirdan-agent-shift-readout li {
+    grid-template-columns: 1fr;
+    gap: 0.16rem;
+    min-width: 0;
+    padding: 0.58rem;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 6px;
+    background: rgba(4, 8, 13, 0.68);
+    font-size: 0.74rem;
 }
 
 .cirdan-mode-grid article:first-child {
@@ -3340,10 +3683,33 @@ code {
     .agent-task-chips,
     .cirdan-capability-grid,
     .cirdan-compare-grid,
-    .cirdan-knowledge-layout,
+    .cirdan-agent-shift-body,
     .cirdan-mode-grid,
     .security-grid {
         grid-template-columns: 1fr;
+    }
+
+    .cirdan-shift-panel-content {
+        min-height: 0;
+    }
+
+    .cirdan-agent-connector {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-rows: auto;
+        padding: 0.08rem 0;
+    }
+
+    .cirdan-connector-line {
+        width: auto;
+        height: 1px;
+        min-width: 0;
+        min-height: 0;
+        justify-self: stretch;
+        background: linear-gradient(90deg, rgba(243, 97, 20, 0.48), rgba(94, 183, 232, 0.52), transparent);
+    }
+
+    .cirdan-agent-shift-readout ol {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .ai-theater-body {
@@ -3540,9 +3906,40 @@ code {
         min-width: 0;
     }
 
+    .cirdan-agent-shift-body {
+        gap: 0.55rem;
+        padding: 0.55rem;
+    }
+
+    .cirdan-shift-panel-content {
+        padding: 0.65rem;
+    }
+
+    .cirdan-dashboard-fragments,
+    .cirdan-context-layer {
+        grid-template-columns: 1fr;
+    }
+
+    .cirdan-context-map {
+        min-height: 184px;
+    }
+
+    .cirdan-shift-copy h3 {
+        font-size: 1.45rem;
+    }
+
     .cirdan-console-readout li {
         grid-template-columns: 1fr;
         gap: 0.12rem;
+    }
+
+    .cirdan-agent-shift-readout {
+        margin: 0 0.55rem 0.55rem;
+    }
+
+    .cirdan-agent-shift-readout ol {
+        grid-template-columns: 1fr;
+        padding: 0.55rem;
     }
 
     .blog-feature-media,
