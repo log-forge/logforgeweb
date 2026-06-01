@@ -2155,6 +2155,182 @@ code {
     color: var(--brand-blue);
 }
 
+.premium-cirdan-link {
+    position: relative;
+    width: 100%;
+    min-height: 54px;
+    overflow: hidden;
+    border-color: rgba(243, 97, 20, 0.82);
+    border-radius: 8px;
+    background:
+        linear-gradient(135deg, rgba(243, 97, 20, 0.13), rgba(94, 183, 232, 0.055) 48%, rgba(2, 6, 10, 0.96)),
+        rgba(2, 6, 10, 0.94);
+    color: #ffffff;
+    box-shadow:
+        0 0 0 1px rgba(243, 97, 20, 0.16) inset,
+        0 14px 38px rgba(243, 97, 20, 0.19),
+        0 0 34px rgba(243, 97, 20, 0.18);
+    isolation: isolate;
+    animation: premium-cirdan-pulse 6s ease-in-out infinite;
+}
+
+.premium-cirdan-link::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image:
+        linear-gradient(rgba(194, 226, 246, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(194, 226, 246, 0.05) 1px, transparent 1px);
+    background-size: 34px 34px;
+    opacity: 0.4;
+}
+
+.premium-cirdan-link:hover,
+.premium-cirdan-link:focus-visible {
+    border-color: rgba(255, 177, 109, 0.92);
+    color: #ffffff;
+    box-shadow:
+        0 0 0 1px rgba(255, 177, 109, 0.24) inset,
+        0 16px 44px rgba(243, 97, 20, 0.26),
+        0 0 42px rgba(243, 97, 20, 0.25);
+}
+
+.premium-cirdan-graph {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.premium-cirdan-label {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    text-shadow: 0 0 18px rgba(243, 97, 20, 0.72);
+}
+
+.premium-cirdan-edge,
+.premium-cirdan-node {
+    position: absolute;
+    display: block;
+}
+
+.premium-cirdan-edge {
+    width: 44%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 177, 109, 0.6), rgba(94, 183, 232, 0.45), transparent);
+    transform-origin: left center;
+    opacity: 0.7;
+    animation: premium-cirdan-edge-drift 12s ease-in-out infinite;
+}
+
+.premium-cirdan-edge-one {
+    top: 30%;
+    left: 6%;
+    transform: rotate(9deg);
+}
+
+.premium-cirdan-edge-two {
+    top: 62%;
+    left: 30%;
+    width: 52%;
+    transform: rotate(-7deg);
+    animation-delay: -3s;
+}
+
+.premium-cirdan-edge-three {
+    top: 46%;
+    left: 58%;
+    width: 32%;
+    transform: rotate(24deg);
+    animation-delay: -7s;
+}
+
+.premium-cirdan-node {
+    width: 8px;
+    height: 8px;
+    border: 1px solid rgba(255, 177, 109, 0.9);
+    border-radius: 50%;
+    background: rgba(243, 97, 20, 0.72);
+    box-shadow: 0 0 16px rgba(243, 97, 20, 0.72);
+    animation: premium-cirdan-node-drift 11s ease-in-out infinite;
+}
+
+.premium-cirdan-node-one {
+    top: 22%;
+    left: 15%;
+}
+
+.premium-cirdan-node-two {
+    top: 64%;
+    left: 34%;
+    border-color: rgba(94, 183, 232, 0.82);
+    background: rgba(94, 183, 232, 0.66);
+    box-shadow: 0 0 15px rgba(94, 183, 232, 0.66);
+    animation-delay: -2.5s;
+}
+
+.premium-cirdan-node-three {
+    top: 34%;
+    right: 18%;
+    animation-delay: -5.5s;
+}
+
+.premium-cirdan-node-four {
+    right: 8%;
+    bottom: 22%;
+    border-color: rgba(94, 183, 232, 0.82);
+    background: rgba(94, 183, 232, 0.62);
+    box-shadow: 0 0 15px rgba(94, 183, 232, 0.62);
+    animation-delay: -8s;
+}
+
+@keyframes premium-cirdan-pulse {
+    0%,
+    100% {
+        border-color: rgba(243, 97, 20, 0.72);
+        box-shadow:
+            0 0 0 1px rgba(243, 97, 20, 0.14) inset,
+            0 14px 38px rgba(243, 97, 20, 0.17),
+            0 0 30px rgba(243, 97, 20, 0.16);
+    }
+
+    50% {
+        border-color: rgba(255, 177, 109, 0.94);
+        box-shadow:
+            0 0 0 1px rgba(255, 177, 109, 0.24) inset,
+            0 18px 48px rgba(243, 97, 20, 0.26),
+            0 0 46px rgba(243, 97, 20, 0.28);
+    }
+}
+
+@keyframes premium-cirdan-node-drift {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.74;
+    }
+
+    50% {
+        transform: translate3d(8px, -5px, 0) scale(1.16);
+        opacity: 1;
+    }
+}
+
+@keyframes premium-cirdan-edge-drift {
+    0%,
+    100% {
+        opacity: 0.44;
+        filter: saturate(1);
+    }
+
+    50% {
+        opacity: 0.86;
+        filter: saturate(1.35);
+    }
+}
+
 .blog-feature-card,
 .post-card {
     display: grid;
@@ -4070,5 +4246,21 @@ code {
         animation-duration: 0.001ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.001ms !important;
+    }
+
+    .premium-cirdan-link,
+    .premium-cirdan-edge,
+    .premium-cirdan-node {
+        animation: none !important;
+    }
+
+    .premium-cirdan-edge {
+        opacity: 0.7;
+        filter: none;
+    }
+
+    .premium-cirdan-node {
+        transform: none !important;
+        opacity: 0.86;
     }
 }
