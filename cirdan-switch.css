@@ -1,0 +1,79 @@
+.cirdan-product-switcher-shell {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid rgba(194, 226, 246, 0.12);
+    background: rgba(2, 7, 11, 0.94);
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(18px);
+}
+
+.cirdan-product-switcher {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(100%, 31rem);
+    padding: 0.24rem;
+    border: 1px solid rgba(194, 226, 246, 0.17);
+    border-radius: 999px;
+    background: #07111c;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.cirdan-product-switcher a {
+    display: grid;
+    place-items: center;
+    min-height: 2.35rem;
+    padding: 0.45rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: #91a3af;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.cirdan-product-switcher a:hover,
+.cirdan-product-switcher a:focus-visible {
+    color: #ffffff;
+}
+
+.cirdan-product-switcher a[aria-current="page"] {
+    border-color: rgba(243, 97, 20, 0.5);
+    background: #f36114;
+    color: #07111c;
+    box-shadow: 0 5px 20px rgba(243, 97, 20, 0.2);
+}
+
+.cirdan-product-switcher a:last-child[aria-current="page"] {
+    border-color: rgba(94, 183, 232, 0.52);
+    background: #5eb7e8;
+    box-shadow: 0 5px 20px rgba(94, 183, 232, 0.2);
+}
+
+.cirdan-product-switcher-shell + .site-header {
+    top: 3.9rem;
+}
+
+@media (max-width: 620px) {
+    .cirdan-product-switcher-shell {
+        padding: 0.5rem;
+    }
+
+    .cirdan-product-switcher a {
+        min-height: 2.2rem;
+        padding-right: 0.55rem;
+        padding-left: 0.55rem;
+        font-size: 0.66rem;
+    }
+
+    .cirdan-product-switcher-shell + .site-header {
+        top: 3.45rem;
+    }
+}

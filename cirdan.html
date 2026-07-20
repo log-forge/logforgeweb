@@ -4,342 +4,287 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Cirdan is the AI-native observability and action layer built on LogForge Unicron, turning operational signals into graph-based knowledge for AI agents." />
-    <title>Cirdan - LogForge AI-Native Observability Layer</title>
+    <meta name="description" content="Cirdan is LogForge's software repair verification system. It reproduces production failures, challenges AI-written patches, and gates delivery on evidence." />
+    <title>Cirdan - Software Repair Verification | LogForge</title>
     <link rel="canonical" href="https://www.logforge.dev/cirdan.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="icon" href="assets/logo-32x32.ico" type="image/x-icon" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="cirdan-switch.css" />
 </head>
 
 <body class="cirdan-page">
     <div class="page-grid" aria-hidden="true"></div>
 
-    <header class="site-header">
+    <div class="cirdan-product-switcher-shell">
+        <nav class="cirdan-product-switcher" aria-label="Choose Cirdan product">
+            <a href="cirdan-logforge.html">LogForge + Cirdan</a>
+            <a href="cirdan.html" aria-current="page">Cirdan standalone</a>
+        </nav>
+    </div>
+
+    <header class="site-header cirdan-site-header">
         <a class="brand" href="./" aria-label="LogForge home">
             <img src="assets/logforge-Icon-transparent-512x512.png" alt="" />
             <span>LogForge</span>
         </a>
-
-        <nav class="site-nav" aria-label="Primary navigation">
-            <a href="./#flow">Live flow</a>
-            <a href="./#incident">Incident delta</a>
-            <a href="./#compare">Compare</a>
-            <a href="./#templates">Templates</a>
-            <a href="blog/">Blog</a>
-            <a href="cirdan.html" aria-current="page">Cirdan</a>
-            <a href="./#premium">Premium</a>
-            <a href="./#install">Install</a>
+        <nav class="cirdan-header-nav" aria-label="Cirdan navigation">
+            <a href="./">Back to LogForge</a>
+            <a class="header-cta" href="./#premium">Request access</a>
         </nav>
-
-        <a class="header-cta" href="https://github.com/log-forge/logforge" target="_blank" rel="noopener noreferrer">GitHub</a>
     </header>
 
     <main class="cirdan-main">
         <section class="cirdan-hero" aria-labelledby="cirdan-title">
             <div class="cirdan-hero-copy">
-                <p class="mono-label">// cirdan.layer</p>
-                <h1 id="cirdan-title">Cirdan is the AI-native observability layer built on LogForge Unicron.</h1>
-                <p class="cirdan-dek">Cirdan is an emerging premium layer for teams building AI-operated infrastructure. It turns logs, metrics, traces, events, alerts, configs, and live state into connected operational knowledge that agents can inspect, cite, explain, report on, and use for approved action.</p>
-                <div class="signal-strip" aria-label="Cirdan positioning">
-                    <span>graph knowledge</span>
-                    <span>agent-oriented operations</span>
-                    <span>human-approved action</span>
-                    <span>built on Unicron</span>
+                <p class="mono-label">// software.repair.verification</p>
+                <h1 id="cirdan-title">AI can write the patch.<br /><span>Cirdan proves it repairs the incident.</span></h1>
+                <p class="cirdan-dek">Cirdan turns a production alert into a controlled repair trial: reproduce the failure, contain the change, challenge the regression, and release only what the evidence supports.</p>
+                <div class="action-row" aria-label="Cirdan actions">
+                    <a class="button button-primary" href="./#premium">Request early access</a>
+                    <a class="button button-secondary" href="#repair-loop">Follow the repair</a>
+                </div>
+                <div class="cirdan-proof-line" aria-label="Cirdan safety model">
+                    <span>target bound</span>
+                    <i></i>
+                    <span>failure proven</span>
+                    <i></i>
+                    <span>repair gated</span>
                 </div>
             </div>
 
-            <aside class="cirdan-graph-console" aria-label="Cirdan operational knowledge graph">
-                <div class="window-bar">
+            <figure class="cirdan-repair-map">
+                <figcaption class="window-bar">
                     <span class="window-dot"></span>
                     <span class="window-dot"></span>
                     <span class="window-dot"></span>
-                    <span class="window-title">logforge://cirdan/knowledge-graph</span>
-                    <span class="window-status">emerging</span>
-                </div>
+                    <span class="window-title">incident / checkout-api</span>
+                    <span class="window-status">live</span>
+                </figcaption>
+                <svg viewBox="0 0 840 520" role="img" aria-labelledby="repair-map-title repair-map-desc">
+                    <title id="repair-map-title">An alert activates Cirdan and moves through the repair pipeline</title>
+                    <desc id="repair-map-desc">A pulsing alert light enters Cirdan, activates the repair agent, then continues through reproduce, repair, and verify stages before reaching a verified pull request.</desc>
+                    <defs>
+                        <filter id="activation-glow" x="-120%" y="-120%" width="340%" height="340%">
+                            <feGaussianBlur stdDeviation="7" result="blur" />
+                            <feMerge>
+                                <feMergeNode in="blur" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                        <path id="activation-route" d="M72 166H160Q196 166 196 202V270Q196 292 218 292H766" />
+                    </defs>
 
-                <div class="cirdan-graph-stage">
-                    <div class="cirdan-orbit" aria-hidden="true">
-                        <span class="cirdan-graph-line cirdan-line-one"></span>
-                        <span class="cirdan-graph-line cirdan-line-two"></span>
-                        <span class="cirdan-graph-line cirdan-line-three"></span>
-                        <span class="cirdan-graph-line cirdan-line-four"></span>
-                        <span class="cirdan-graph-line cirdan-line-five"></span>
-                        <span class="cirdan-graph-line cirdan-line-six"></span>
-                        <span class="cirdan-graph-node cirdan-node-center">CIRDAN</span>
-                        <span class="cirdan-graph-node cirdan-node-logs">logs</span>
-                        <span class="cirdan-graph-node cirdan-node-metrics">metrics</span>
-                        <span class="cirdan-graph-node cirdan-node-traces">traces</span>
-                        <span class="cirdan-graph-node cirdan-node-alerts">alerts</span>
-                        <span class="cirdan-graph-node cirdan-node-configs">configs</span>
-                        <span class="cirdan-graph-node cirdan-node-state">live state</span>
-                    </div>
+                    <g class="repair-map-grid" aria-hidden="true">
+                        <path d="M0 80H840 M0 160H840 M0 240H840 M0 320H840 M0 400H840 M0 480H840" />
+                        <path d="M80 0V520 M160 0V520 M240 0V520 M320 0V520 M400 0V520 M480 0V520 M560 0V520 M640 0V520 M720 0V520 M800 0V520" />
+                    </g>
 
-                    <div class="cirdan-console-readout">
-                        <div class="panel-heading">
-                            <span>// agent.context</span>
-                            <strong>source-linked</strong>
-                        </div>
-                        <ol>
-                            <li><span>consume</span> telemetry and system state</li>
-                            <li><span>connect</span> service, host, workload, and alert relationships</li>
-                            <li><span>compress</span> noisy data into usable operational knowledge</li>
-                            <li><span>govern</span> action through explicit operator approval</li>
-                        </ol>
-                    </div>
+                    <g class="activation-alert" transform="translate(72 166)">
+                        <circle class="activation-alert-wave activation-alert-wave-one" r="35" />
+                        <circle class="activation-alert-wave activation-alert-wave-two" r="35" />
+                        <circle class="activation-alert-body" r="21" />
+                        <circle class="activation-alert-core" r="7" />
+                        <text y="58">ALERT</text>
+                        <text class="activation-detail" y="76">checkout-api</text>
+                    </g>
+
+                    <use class="activation-pipe-outer" href="#activation-route" />
+                    <use class="activation-pipe-inner" href="#activation-route" />
+
+                    <g class="activation-cirdan" transform="translate(330 292)">
+                        <circle class="activation-cirdan-wave" r="87" />
+                        <circle class="activation-cirdan-rim" r="69" />
+                        <circle class="activation-cirdan-body" r="57" />
+                        <path class="activation-cirdan-mark" d="M-19 -8H-7L1 -20M-19 8H-7L1 20M19 -8H7L-1 -20M19 8H7L-1 20" />
+                        <circle r="7" />
+                        <text class="activation-cirdan-name" y="-82">CIRDAN</text>
+                        <text class="activation-cirdan-status" y="92">ACTIVATED</text>
+                    </g>
+
+                    <g class="activation-stage activation-stage-reproduce" transform="translate(478 292)">
+                        <circle r="25" />
+                        <path d="M-8 0A8 8 0 1 0 0 -8M0 -13V-4H9" />
+                        <text y="54">REPRODUCE</text>
+                    </g>
+
+                    <g class="activation-stage activation-stage-repair" transform="translate(590 292)">
+                        <circle r="25" />
+                        <path d="M-10 8L8 -10M2 -12L10 -4M-12 3L-3 12" />
+                        <text y="54">REPAIR</text>
+                    </g>
+
+                    <g class="activation-stage activation-stage-verify" transform="translate(702 292)">
+                        <circle r="25" />
+                        <path d="M-11 0L-3 9L12 -10" />
+                        <text y="54">VERIFY</text>
+                    </g>
+
+                    <g class="activation-output" transform="translate(790 292)">
+                        <path class="activation-output-page" d="M-22 -31H10L22 -19V31H-22Z" />
+                        <path class="activation-output-fold" d="M10 -31V-19H22" />
+                        <path class="activation-output-check" d="M-11 4L-3 12L12 -7" />
+                        <text y="54">VERIFIED PR</text>
+                    </g>
+
+                    <circle class="activation-light" r="9">
+                        <animateMotion dur="7s" repeatCount="indefinite" keyPoints="0;0;0.403;0.403;1;1" keyTimes="0;0.14;0.39;0.53;0.9;1" calcMode="linear">
+                            <mpath href="#activation-route" />
+                        </animateMotion>
+                        <animate attributeName="fill" dur="7s" repeatCount="indefinite" values="#ff5d5d;#ff5d5d;#f36114;#f36114;#5eb7e8;#81e1ae" keyTimes="0;0.14;0.39;0.53;0.9;1" />
+                        <animate attributeName="r" dur="7s" repeatCount="indefinite" values="7;12;7;12;8;8;7" keyTimes="0;0.08;0.14;0.46;0.53;0.9;1" />
+                    </circle>
+
+                    <g class="activation-caption">
+                        <text x="30" y="466">ALERT RECEIVED</text>
+                        <path d="M143 462H697" />
+                        <text x="810" y="466" text-anchor="end">REPAIR VERIFIED</text>
+                    </g>
+                </svg>
+                <div class="cirdan-map-readout" aria-hidden="true">
+                    <span><i></i> alert received</span>
+                    <span><i></i> Cirdan activated</span>
+                    <span><i></i> repair moving</span>
                 </div>
-            </aside>
+            </figure>
         </section>
 
-        <section id="what" class="section cirdan-section" aria-labelledby="what-title">
-            <div class="section-intro">
-                <p class="mono-label">// what.cirdan.is</p>
-                <h2 id="what-title">An observability and action layer for agents, not another dashboard.</h2>
-                <p>Cirdan is designed for a world where AI agents become primary readers of infrastructure state. Instead of leaving the model to reconstruct operations from isolated screens, Cirdan keeps a continuously updated system graph that reflects what is running, what changed, what failed, and what evidence supports each answer.</p>
-            </div>
+        <section id="repair-loop" class="cirdan-loop-section" aria-labelledby="loop-title">
+            <header class="cirdan-section-head">
+                <div>
+                    <p class="mono-label">// immutable.evidence.chain</p>
+                    <h2 id="loop-title">A repair has to earn the next step.</h2>
+                </div>
+                <p>The model proposes. The repair contract decides. Missing evidence never becomes model confidence, and a failed gate becomes a clear manual handoff.</p>
+            </header>
 
-            <div class="cirdan-capability-grid">
-                <article class="cirdan-capability-card">
-                    <span>inspect</span>
-                    <h3>Read the system as a graph</h3>
-                    <p>Agents can traverse from a symptom to related logs, metrics, traces, alerts, configs, hosts, services, workloads, incidents, and ownership context.</p>
-                </article>
-                <article class="cirdan-capability-card">
-                    <span>explain</span>
-                    <h3>Turn signals into grounded answers</h3>
-                    <p>Operational data is compressed into connected knowledge, so reports and explanations can cite the state and relationships that shaped the result.</p>
-                </article>
-                <article class="cirdan-capability-card">
-                    <span>act</span>
-                    <h3>Keep action scoped and governed</h3>
-                    <p>Cirdan can stay advisory, or move into action only where a human operator has explicitly allowed a scoped change, remediation, or setup task.</p>
-                </article>
-            </div>
+            <ol class="cirdan-loop">
+                <li>
+                    <span class="cirdan-loop-number">01</span>
+                    <div><strong>Bind</strong><small>explicit service + repository target</small></div>
+                </li>
+                <li>
+                    <span class="cirdan-loop-number">02</span>
+                    <div><strong>Baseline</strong><small>same pinned probe must fail first</small></div>
+                </li>
+                <li>
+                    <span class="cirdan-loop-number">03</span>
+                    <div><strong>Contain</strong><small>authorized change surface only</small></div>
+                </li>
+                <li>
+                    <span class="cirdan-loop-number">04</span>
+                    <div><strong>Challenge</strong><small>regression proof + specialist review</small></div>
+                </li>
+                <li>
+                    <span class="cirdan-loop-number">05</span>
+                    <div><strong>Gate</strong><small>verified PR or manual required</small></div>
+                </li>
+            </ol>
         </section>
 
-        <section id="why" class="section cirdan-section" aria-labelledby="why-title">
-            <div class="section-intro compact">
-                <p class="mono-label">// why.agents.need.knowledge</p>
-                <h2 id="why-title">Dashboards show state. Agents need operational memory.</h2>
-                <p>Human operators can bridge gaps between panels, runbooks, deployment history, alerts, and tribal knowledge. Agents need that context represented directly, with relationships intact.</p>
+        <section class="cirdan-difference" aria-labelledby="difference-title">
+            <header class="cirdan-difference-statement">
+                <p class="mono-label">// category.delta</p>
+                <h2 id="difference-title">The difference is not the AI.<br /><span>It is what must be true before Cirdan trusts it.</span></h2>
+                <p>Investigation, root-cause analysis, remediation suggestions, and generated pull requests are becoming table stakes. Cirdan is built around the harder part: proving that a proposed code change repairs this incident without creating the next one.</p>
+            </header>
+
+            <div class="cirdan-market-delta" aria-label="AI SRE category compared with the Cirdan repair contract">
+                <div>
+                    <span class="cirdan-delta-label">COMMON AI SRE LOOP</span>
+                    <strong>investigate <i>→</i> explain <i>→</i> suggest <i>→</i> act</strong>
+                    <p>The model's conclusion remains the center of trust.</p>
+                </div>
+                <div>
+                    <span class="cirdan-delta-label">CIRDAN REPAIR CONTRACT</span>
+                    <strong>bind <i>→</i> reproduce <i>→</i> contain <i>→</i> challenge <i>→</i> verify</strong>
+                    <p>Deterministic evidence gates—not model confidence—decide whether a repair advances.</p>
+                </div>
             </div>
 
-            <div class="cirdan-compare-grid">
-                <article>
-                    <div class="delta-head">
-                        <span>DASHBOARD-FIRST</span>
-                        <strong>views</strong>
-                    </div>
-                    <ul>
-                        <li>Logs, metrics, alerts, and config live in separate places.</li>
-                        <li>Context is rebuilt manually during every incident.</li>
-                        <li>The model sees snippets, not operational relationships.</li>
-                        <li>Action depends on a human translating diagnosis into commands or rule changes.</li>
-                    </ul>
-                </article>
+            <ol class="cirdan-evidence-track">
+                <li>
+                    <span>01 / TARGET</span>
+                    <strong>Bound before touched</strong>
+                    <p>An explicit service registry fixes the repository, runtime, probes, and permissions in scope.</p>
+                </li>
+                <li>
+                    <span>02 / FAILURE</span>
+                    <strong>Proven before patched</strong>
+                    <p>The pinned incident probe must fail in an isolated Compose or Kubernetes runner.</p>
+                </li>
+                <li>
+                    <span>03 / CHANGE</span>
+                    <strong>Contained before tested</strong>
+                    <p>The patch is checked against its authorized change surface and integrity rules.</p>
+                </li>
+                <li>
+                    <span>04 / REGRESSION</span>
+                    <strong>Challenged, not admired</strong>
+                    <p>Counterfactual proof, patch-bound suites, and conditional specialists try to disprove the fix.</p>
+                </li>
+                <li>
+                    <span>05 / DELIVERY</span>
+                    <strong>Evidence before privilege</strong>
+                    <p>The same probe must pass after the patch. Failed gates stop at <code>manual_required</code>.</p>
+                </li>
+            </ol>
 
-                <article>
-                    <div class="delta-head">
-                        <span>CIRDAN</span>
-                        <strong>graph</strong>
-                    </div>
-                    <ul>
-                        <li>Signals are connected to services, workloads, hosts, incidents, and live state.</li>
-                        <li>Historical and current context stays available for the next agent task.</li>
-                        <li>The model can inspect, cite, explain, report, and recommend from one operational knowledge layer.</li>
-                        <li>Approved action can be routed through scoped policy instead of improvised terminal work.</li>
-                    </ul>
-                </article>
-            </div>
-        </section>
-
-        <section id="knowledge" class="section cirdan-section" aria-labelledby="knowledge-title">
-            <div class="section-intro">
-                <p class="mono-label">// agent-native.observability</p>
-                <h2 id="knowledge-title">Built for AI agents, not human operators.</h2>
-                <p>Traditional observability was built for human operators: dashboards, charts, log streams, and manual context-building. Cirdan keeps that evidence available, then reshapes it into context an agent can read, cite, and reason across while systems are live.</p>
-            </div>
-
-            <div class="cirdan-agent-shift-console" aria-label="Human dashboard to agent context interface">
-                <div class="window-bar">
-                    <span class="window-dot"></span>
-                    <span class="window-dot"></span>
-                    <span class="window-dot"></span>
-                    <span class="window-title">logforge://cirdan/human-to-agent</span>
-                    <span class="window-status">context</span>
-                </div>
-
-                <div class="cirdan-agent-shift-body">
-                    <article class="cirdan-shift-panel cirdan-human-panel">
-                        <div class="panel-heading">
-                            <span>// human.dashboard</span>
-                            <strong>fragments</strong>
-                        </div>
-                        <div class="cirdan-shift-panel-content">
-                            <div class="cirdan-shift-copy">
-                                <h3>Human-oriented observability</h3>
-                                <p>Dashboards, charts, alerts, and logs expose slices of state. The operator still has to stitch them into incident context.</p>
-                            </div>
-
-                            <div class="cirdan-dashboard-fragments" aria-label="Human observability fragments">
-                                <div class="cirdan-dashboard-fragment">
-                                    <span class="cirdan-fragment-label">charts</span>
-                                    <div class="cirdan-mini-chart" aria-hidden="true">
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                    </div>
-                                </div>
-                                <div class="cirdan-dashboard-fragment cirdan-alert-fragment">
-                                    <span class="cirdan-fragment-label">alerts</span>
-                                    <p>api p95 high</p>
-                                    <p>queue lag rising</p>
-                                </div>
-                                <div class="cirdan-dashboard-fragment cirdan-log-fragment">
-                                    <span class="cirdan-fragment-label">logs</span>
-                                    <p>checkout timeout</p>
-                                    <p>retry budget hit</p>
-                                </div>
-                                <div class="cirdan-dashboard-fragment cirdan-config-fragment">
-                                    <span class="cirdan-fragment-label">configs</span>
-                                    <p>rule: page after 5m</p>
-                                    <p>deploy: payments:v42</p>
-                                </div>
-                            </div>
-
-                            <div class="cirdan-source-chips" aria-label="Human-facing source types">
-                                <span>dashboards</span>
-                                <span>alerts</span>
-                                <span>logs</span>
-                                <span>configs</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <div class="cirdan-agent-connector" aria-label="The interface is moving from human eyes to agent perception">
-                        <span class="cirdan-connector-node">human eyes</span>
-                        <span class="cirdan-connector-line"></span>
-                        <span class="cirdan-connector-node cirdan-connector-node-agent">agent perception</span>
-                    </div>
-
-                    <article class="cirdan-shift-panel cirdan-context-panel">
-                        <div class="panel-heading">
-                            <span>// cirdan.context</span>
-                            <strong>agent-ready</strong>
-                        </div>
-                        <div class="cirdan-shift-panel-content">
-                            <div class="cirdan-shift-copy">
-                                <h3>Cirdan</h3>
-                                <p>Cirdan turns observability into agent infrastructure: a living context layer agents can inspect, connect, cite, and use to prepare approved action.</p>
-                            </div>
-
-                            <div class="cirdan-context-layer" aria-label="Agent-readable context layer">
-                                <div class="cirdan-context-map" aria-hidden="true">
-                                    <span class="cirdan-context-link cirdan-context-link-one"></span>
-                                    <span class="cirdan-context-link cirdan-context-link-two"></span>
-                                    <span class="cirdan-context-link cirdan-context-link-three"></span>
-                                    <span class="cirdan-context-node cirdan-context-node-core">context</span>
-                                    <span class="cirdan-context-node cirdan-context-node-logs">logs</span>
-                                    <span class="cirdan-context-node cirdan-context-node-alert">alert</span>
-                                    <span class="cirdan-context-node cirdan-context-node-config">config</span>
-                                </div>
-
-                                <div class="cirdan-agent-readouts">
-                                    <div>
-                                        <span>connected.signals</span>
-                                        <strong>service + workload + alert</strong>
-                                    </div>
-                                    <div>
-                                        <span>citations</span>
-                                        <strong>logs, deploy, rule state</strong>
-                                    </div>
-                                    <div>
-                                        <span>action.prep</span>
-                                        <strong>approval required</strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="cirdan-source-chips cirdan-context-chips" aria-label="Agent-facing context capabilities">
-                                <span>inspect</span>
-                                <span>connect</span>
-                                <span>cite</span>
-                                <span>prepare</span>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-
-                <div class="cirdan-console-readout cirdan-agent-shift-readout">
-                    <div class="panel-heading">
-                        <span>// context.pipeline</span>
-                        <strong>operator governed</strong>
-                    </div>
-                    <ol>
-                        <li><span>inspect</span> read current state and evidence</li>
-                        <li><span>connect</span> preserve service relationships</li>
-                        <li><span>cite</span> keep answers grounded in sources</li>
-                        <li><span>prepare</span> stage scoped action for approval</li>
-                    </ol>
-                </div>
+            <div class="cirdan-safety-tape" aria-label="Cirdan safety gates">
+                <span>NO DISCOVERY GUESSWORK</span><i>→</i>
+                <span>NO UNPROVEN BASELINE</span><i>→</i>
+                <span>NO UNBOUNDED PATCH</span><i>→</i>
+                <span>NO CONFIDENCE-BASED SHIP</span>
             </div>
         </section>
 
-        <section id="modes" class="section cirdan-section" aria-labelledby="modes-title">
-            <div class="section-intro compact">
-                <p class="mono-label">// operating.modes</p>
-                <h2 id="modes-title">Advisory by default. Action only when explicitly allowed.</h2>
-                <p>Cirdan separates analysis from authority. It can explain what is happening without changing the system, then step into bounded action only after human approval and policy allow it.</p>
-            </div>
+        <section class="cirdan-close" aria-labelledby="close-title">
+            <header class="cirdan-close-copy">
+                <p class="mono-label">// from.signal.to.change</p>
+                <h2 id="close-title">Keep your stack.<br /><span>Add a repair contract.</span></h2>
+                <p>Keep the signals, coding agents, and delivery controls your team already trusts. Cirdan supplies the evidence chain between generated code and production recovery.</p>
+            </header>
 
-            <div class="cirdan-mode-grid">
-                <article>
-                    <span class="cirdan-mode-tag">advisory.mode</span>
-                    <h3>Explain, report, investigate</h3>
-                    <p>Use Cirdan to summarize incidents, compare service behavior, identify likely causes, explain container or workload context, and produce operational knowledge for teams and end users.</p>
-                </article>
-                <article>
-                    <span class="cirdan-mode-tag">approved.action.mode</span>
-                    <h3>Scoped work under operator control</h3>
-                    <p>When a human explicitly permits it, Cirdan can help set up monitoring, change rules, run approved remediation, and take scoped or full actions on the operator's behalf.</p>
-                </article>
-            </div>
-        </section>
-
-        <section id="unicron" class="section cirdan-section" aria-labelledby="unicron-title">
-            <div class="cirdan-unicron-layout">
-                <div class="cirdan-unicron-copy">
-                    <p class="mono-label">// built.on.unicron</p>
-                    <h2 id="unicron-title">Cirdan sits above the Unicron control plane.</h2>
-                    <p>LogForge Unicron is the Docker-native base: local and agent-forwarded logs, metrics, Docker events, alert rules, notifications, file access, and safe remediation. Cirdan builds on that foundation as a premium AI-native layer for graph knowledge and agent-oriented operations.</p>
+            <div class="cirdan-conduit" aria-label="Signal to verified change">
+                <div class="cirdan-conduit-input">
+                    <span>// signal.in</span>
+                    <strong>Grafana<br />Alertmanager<br />Slack</strong>
                 </div>
 
-                <aside class="cirdan-stack" aria-label="Cirdan relationship to LogForge Unicron">
-                    <div class="cirdan-stack-layer cirdan-layer-cirdan">
-                        <span class="cirdan-layer-label">Cirdan</span>
-                        <strong>AI-native knowledge and action layer</strong>
-                        <p>Graph context, agent reports, investigation, recommendations, and approved operational action.</p>
+                <div class="cirdan-conduit-engine">
+                    <span class="cirdan-engine-kicker">// repair.engine</span>
+                    <strong>CIRDAN</strong>
+                    <div>
+                        <span>bind</span>
+                        <span>baseline</span>
+                        <span>challenge</span>
+                        <span>gate</span>
                     </div>
-                    <div class="cirdan-stack-layer">
-                        <span class="cirdan-layer-label">LogForge Unicron</span>
-                        <strong>Self-hosted observability and control base</strong>
-                        <p>Docker dashboard, telemetry ingestion, alerts, notifiers, file access, agents, and guarded remediation.</p>
-                    </div>
-                </aside>
+                </div>
+
+                <div class="cirdan-conduit-output">
+                    <span>// proof.out</span>
+                    <strong>Verified change</strong>
+                    <em>pull request + recovery evidence</em>
+                </div>
+            </div>
+
+            <div class="cirdan-access-row">
+                <div>
+                    <span>EARLY ACCESS</span>
+                    <strong>Put verified repair into your on-call loop.</strong>
+                </div>
+                <a class="button button-primary" href="./#premium">Request early access</a>
             </div>
         </section>
     </main>
 
     <footer class="site-footer">
-        <p>&copy; 2026 LogForge. Docker alerts, routes, and guarded fixes from your own host.</p>
+        <p>&copy; 2026 LogForge. Guarded software repair for production incidents.</p>
         <a href="mailto:logforge@gmail.com">logforge@gmail.com</a>
     </footer>
-
-    <script src="script.js"></script>
 </body>
 
 </html>
